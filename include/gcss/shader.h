@@ -11,7 +11,7 @@
 #include "glm/gtc/type_ptr.hpp"
 #include "spdlog/spdlog.h"
 
-namespace css {
+namespace gcss {
 
 class Shader {
  private:
@@ -250,6 +250,6 @@ class Shader {
   }
 };
 
-}  // namespace css
+}  // namespace gcss
 
 #endif

@@ -4,10 +4,10 @@
 #include "glad/gl.h"
 #include "glm/glm.hpp"
 //
-#include "css/quad.h"
-#include "css/texture.h"
+#include "gcss/quad.h"
+#include "gcss/texture.h"
 
-using namespace css;
+using namespace gcss;
 
 class Renderer {
  private:

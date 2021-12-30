@@ -4,7 +4,7 @@
 #include "glad/gl.h"
 #include "shader.h"
 
-namespace css {
+namespace gcss {
 
 class Quad {
  private:

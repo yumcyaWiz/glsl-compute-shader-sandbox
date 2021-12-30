@@ -3,7 +3,7 @@
 #include "glad/gl.h"
 #include "glm/glm.hpp"
 
-namespace css {
+namespace gcss {
 
 class Texture {
  private:
