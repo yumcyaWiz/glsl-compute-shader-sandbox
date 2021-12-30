@@ -236,6 +236,18 @@ class Shader {
 
     deactivate();
   }
+
+  void setImageTexture(GLuint texture, GLuint image_unit_number, GLenum access,
+                       GLenum format) const {
+    activate();
+
+    // bind texture to the specified image unit
+    glActiveTexture(GL_TEXTURE0 + image_unit_number);
+    glBindImageTexture(image_unit_number, texture, 0, GL_FALSE, 0, access,
+                       format);
+
+    deactivate();
+  }
 };
 
 }  // namespace css
