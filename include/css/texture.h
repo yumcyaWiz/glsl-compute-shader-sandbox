@@ -1,16 +1,27 @@
 #ifndef _CSS_TEXTURE_H
 #define _CSS_TEXTURE_H
 #include "glad/gl.h"
+#include "glm/glm.hpp"
 
 namespace css {
 
 class Texture {
  private:
-  uint32_t width;
-  uint32_t height;
+  glm::uvec2 resolution;
   GLuint texture;
+  GLint internalFormat;
+  GLenum format;
+  GLenum type;
 
-  Texture(uint32_t width, uint32_t height) : width(width), height(height) {
+ public:
+  Texture() {}
+
+  Texture(const glm::uvec2& resolution, GLint internal_format, GLenum format,
+          GLenum type)
+      : resolution(resolution),
+        internalFormat(internal_format),
+        format(format),
+        type(type) {
     // init texture
     glGenTextures(1, &this->texture);
     glBindTexture(GL_TEXTURE_2D, this->texture);
@@ -18,9 +29,15 @@ class Texture {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA,
-                 GL_FLOAT, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, this->internalFormat, this->resolution.x,
+                 this->resolution.y, 0, this->format, this->type, nullptr);
     glBindTexture(GL_TEXTURE_2D, 0);
+  }
+
+  void setResolution(const glm::uvec2& resolution) {
+    this->resolution = resolution;
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, resolution.x, resolution.y, 0,
+                 GL_RGBA, GL_FLOAT, nullptr);
   }
 
   // destroy texture object
