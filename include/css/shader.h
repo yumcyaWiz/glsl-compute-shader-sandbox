@@ -1,5 +1,10 @@
 #ifndef _CSS_SHADER_H
 #define _CSS_SHADER_H
+#include <filesystem>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <variant>
 
 #include "glad/gl.h"
 #include "glm/glm.hpp"

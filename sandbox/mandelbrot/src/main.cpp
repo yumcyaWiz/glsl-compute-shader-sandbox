@@ -8,6 +8,8 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+//
+#include "renderer.h"
 
 static void glfwErrorCallback(int error, const char* description) {
   fprintf(stderr, "Glfw Error %d: %s\n", error, description);
@@ -56,6 +58,8 @@ int main() {
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init("#version 460 core");
 
+  Renderer renderer;
+
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
 
@@ -67,7 +71,8 @@ int main() {
     ImGui::Begin("UI");
     ImGui::End();
 
-    glClear(GL_COLOR_BUFFER_BIT);
+    // render
+    renderer.render();
 
     // render imgui
     ImGui::Render();
