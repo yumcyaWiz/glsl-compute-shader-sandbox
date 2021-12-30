@@ -1,1 +1,1 @@
-add_subdirectory(mandelbrot)
+add_subdirectory(hello)

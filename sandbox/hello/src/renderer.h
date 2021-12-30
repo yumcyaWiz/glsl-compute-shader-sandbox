@@ -5,6 +5,7 @@
 #include "glm/glm.hpp"
 //
 #include "css/quad.h"
+#include "css/texture.h"
 
 using namespace css;
 
@@ -12,12 +13,20 @@ class Renderer {
  private:
   glm::vec2 resolution;
 
+  Texture texture;
+
   Quad quad;
-  Shader mandelbrotShader;
+  Shader helloShader;
   Shader renderShader;
 
  public:
   Renderer() : resolution{512, 512} {
+    texture = Texture(resolution, GL_RGBA32F, GL_RGBA, GL_FLOAT);
+
+    helloShader.setComputeShader(
+        std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
+        "hello.comp");
+
     renderShader.setVertexShader(
         std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
         "render.vert");
