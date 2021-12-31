@@ -47,7 +47,10 @@ class Renderer {
   void render() const {
     // run compute shader
     mandelbrotShader.setImageTexture(texture, 0, GL_WRITE_ONLY);
-    mandelbrotShader.run(resolution.x, resolution.y, 1);
+    mandelbrotShader.setUniform("center", glm::vec2(0));
+    mandelbrotShader.setUniform("scale", 1.0f);
+    mandelbrotShader.setUniform("max_iterations", 100u);
+    mandelbrotShader.run(resolution.x / 8, resolution.y / 8, 1);
 
     // render quad
     glClear(GL_COLOR_BUFFER_BIT);

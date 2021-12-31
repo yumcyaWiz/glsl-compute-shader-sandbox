@@ -1,14 +1,31 @@
 #version 460 core
-layout(local_size_x = 1, local_size_y = 1) in;
+layout(local_size_x = 8, local_size_y = 8) in;
 
 layout(rgba32f, binding = 0) uniform image2D image;
+uniform vec2 center;
+uniform float scale;
+uniform uint max_iterations;
+
+vec2 cmult(vec2 z1, vec2 z2) {
+  return vec2(z1.x*z2.x - z1.y*z2.y, z1.x*z2.y + z1.y*z2.x);
+}
 
 void main() {
   ivec2 gidx = ivec2(gl_GlobalInvocationID.xy);
   ivec2 size = imageSize(image);
+  vec2 uv = (2.0*gidx - size) / size;
 
-  vec2 uv = vec2(gidx) / vec2(size);
-  vec4 color = vec4(uv, 0.0, 1.0);
+  vec2 c = center + scale * uv;
+  vec2 z = vec2(0, 0);
+  uint iter_diverge = max_iterations;
+  for(uint i = 0; i < max_iterations; ++i) {
+    z = cmult(z, z) + c;
+    if(length(z) > 2.0) {
+      iter_diverge = i;
+      break;
+    }
+  }
+  vec3 color = vec3(iter_diverge / float(max_iterations));
 
-  imageStore(image, gidx, color);
+  imageStore(image, gidx, vec4(color, 1.0));
 }
