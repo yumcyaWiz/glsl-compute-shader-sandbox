@@ -13,6 +13,7 @@
 #include "renderer.h"
 
 std::unique_ptr<Renderer> RENDERER;
+int FPS = 60;
 
 static void glfwErrorCallback(int error, const char* description) {
   fprintf(stderr, "Glfw Error %d: %s\n", error, description);
@@ -105,6 +106,10 @@ int main() {
 
       ImGui::Separator();
 
+      if (ImGui::InputInt("FPS", &FPS)) {
+        RENDERER->setFPS(FPS);
+      }
+
       if (ImGui::Button("Randomize cells")) {
         RENDERER->randomizeCells();
       }
@@ -114,7 +119,7 @@ int main() {
     handleInput(window, io);
 
     // render
-    RENDERER->render();
+    RENDERER->render(io.DeltaTime);
 
     // render imgui
     ImGui::Render();

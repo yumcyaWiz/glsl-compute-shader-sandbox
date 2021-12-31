@@ -17,6 +17,7 @@ class Renderer {
   glm::uvec2 resolution;
   glm::vec2 offset;
   float scale;
+  uint32_t fps;
 
   Texture inputCells;
   Texture outputCells;
@@ -26,11 +27,14 @@ class Renderer {
   ComputeShader swapCells;
   Shader renderShader;
 
+  double elapsed_time;
+
  public:
   Renderer()
       : resolution{512, 512},
         offset{256, 256},
         scale{1},
+        elapsed_time{0},
         inputCells{glm::uvec2(512, 512), GL_R8UI, GL_RED_INTEGER,
                    GL_UNSIGNED_BYTE},
         outputCells{glm::uvec2(512, 512), GL_R8UI, GL_RED_INTEGER,
@@ -97,16 +101,24 @@ class Renderer {
 
   void zoom(const float delta) { this->scale += this->scale * delta; }
 
-  void render() const {
-    // update input cells
-    updateCells.setImageTexture(inputCells, 0, GL_READ_ONLY);
-    updateCells.setImageTexture(outputCells, 1, GL_WRITE_ONLY);
-    updateCells.run(resolution.x / 8, resolution.y / 8, 1);
+  void setFPS(uint32_t fps) { this->fps = fps; }
 
-    // swap input cells and output cells
-    swapCells.setImageTexture(inputCells, 0, GL_READ_ONLY);
-    swapCells.setImageTexture(outputCells, 1, GL_WRITE_ONLY);
-    swapCells.run(resolution.x / 8, resolution.y / 8, 1);
+  void render(float delta_time) {
+    // limit framerate
+    elapsed_time += delta_time;
+    if (elapsed_time > 1.0f / fps) {
+      elapsed_time = 0;
+
+      // update input cells
+      updateCells.setImageTexture(inputCells, 0, GL_READ_ONLY);
+      updateCells.setImageTexture(outputCells, 1, GL_WRITE_ONLY);
+      updateCells.run(resolution.x / 8, resolution.y / 8, 1);
+
+      // swap input cells and output cells
+      swapCells.setImageTexture(inputCells, 0, GL_READ_ONLY);
+      swapCells.setImageTexture(outputCells, 1, GL_WRITE_ONLY);
+      swapCells.run(resolution.x / 8, resolution.y / 8, 1);
+    }
 
     // render quad
     glClear(GL_COLOR_BUFFER_BIT);
