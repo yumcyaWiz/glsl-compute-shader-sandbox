@@ -15,6 +15,8 @@ using namespace gcss;
 class Renderer {
  private:
   glm::uvec2 resolution;
+  glm::vec2 offset;
+  float scale;
 
   Texture inputCells;
   Texture outputCells;
@@ -27,6 +29,8 @@ class Renderer {
  public:
   Renderer()
       : resolution{512, 512},
+        offset{256, 256},
+        scale{1},
         inputCells{glm::uvec2(512, 512), GL_R8UI, GL_RED_INTEGER,
                    GL_UNSIGNED_BYTE},
         outputCells{glm::uvec2(512, 512), GL_R8UI, GL_RED_INTEGER,
@@ -75,12 +79,17 @@ class Renderer {
 
   void setResolution(const glm::uvec2& resolution) {
     this->resolution = resolution;
+    this->offset = 0.5f * glm::vec2(resolution);
 
     inputCells.setResolution(this->resolution);
     outputCells.setResolution(this->resolution);
 
     randomizeCells();
   }
+
+  void move(const glm::vec2& delta) { this->offset += delta / this->scale; }
+
+  void zoom(const float delta) { this->scale += this->scale * delta; }
 
   void render() const {
     // update input cells
@@ -96,7 +105,9 @@ class Renderer {
     // render quad
     glClear(GL_COLOR_BUFFER_BIT);
     glViewport(0, 0, resolution.x, resolution.y);
-    renderShader.setTexture("cell", outputCells, 0);
+    renderShader.setImageTexture(outputCells, 0, GL_READ_ONLY);
+    renderShader.setUniform("offset", offset);
+    renderShader.setUniform("scale", scale);
     quad.draw(renderShader);
   }
 };

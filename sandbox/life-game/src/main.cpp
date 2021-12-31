@@ -27,6 +27,17 @@ void handleInput(GLFWwindow* window, const ImGuiIO& io) {
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
     glfwSetWindowShouldClose(window, GLFW_TRUE);
   }
+
+  // move
+  if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+    RENDERER->move(100.0f * io.DeltaTime *
+                   glm::vec2(-io.MouseDelta.x, io.MouseDelta.y));
+  }
+
+  // zoom in/out
+  if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
+    RENDERER->zoom(0.1f * io.DeltaTime * io.MouseDelta.y);
+  }
 }
 
 int main() {
@@ -48,7 +59,6 @@ int main() {
     return -1;
   }
   glfwMakeContextCurrent(window);
-  glfwSwapInterval(1);  // enable vsync
 
   glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
