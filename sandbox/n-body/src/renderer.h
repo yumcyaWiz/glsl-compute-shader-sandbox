@@ -22,7 +22,8 @@ class Renderer {
   glm::uvec2 resolution;
   uint32_t nParticles;
 
-  ShaderStorageBuffer particles;
+  ShaderStorageBuffer inputParticles;
+  ShaderStorageBuffer outputParticles;
 
   Quad quad;
   ComputeShader updateParticles;
@@ -30,7 +31,7 @@ class Renderer {
   Shader renderShader;
 
  public:
-  Renderer() : resolution{512, 512}, nParticles{1000000} {
+  Renderer() : resolution{512, 512}, nParticles{10000} {
     updateParticles.setComputeShader(
         std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
         "update-particles.comp");
@@ -48,11 +49,14 @@ class Renderer {
         std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
         "render.frag");
     renderShader.linkShader();
+
+    randomizeParticles();
   }
 
   void destroy() {
     quad.destroy();
-    particles.destroy();
+    inputParticles.destroy();
+    outputParticles.destroy();
     updateParticles.destroy();
     swapParticles.destroy();
     renderShader.destroy();
@@ -75,13 +79,16 @@ class Renderer {
       data[i].velocity = glm::vec4(dist(mt), dist(mt), dist(mt), 0);
     }
 
-    particles.setData(data);
+    inputParticles.setData(data);
+    outputParticles.setData(data);
   }
 
   void render() const {
-    updateParticles.run(resolution.x / 8, resolution.y / 8, 1);
+    inputParticles.bind(0);
+    outputParticles.bind(1);
+    updateParticles.run(nParticles / 128, 1, 1);
 
-    swapParticles.run(resolution.x / 8, resolution.y / 8, 1);
+    swapParticles.run(nParticles / 128, 1, 1);
 
     // render quad
     glClear(GL_COLOR_BUFFER_BIT);
