@@ -24,6 +24,10 @@ make
 
 ![](img/hello.png)
 
+### mandelbrot
+
+![](img/mandelbrot.jpg)
+
 ## Externals
 
 * [glad](https://github.com/Dav1dde/glad)
