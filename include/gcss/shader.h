@@ -68,10 +68,6 @@ class Shader {
 
  public:
   Shader() {}
-  ~Shader() {
-    spdlog::info("[Shader] destory");
-    destroy();
-  }
 
   void setVertexShader(const std::filesystem::path& vertexShaderFilepath) {
     // delete previous shader
@@ -175,6 +171,8 @@ class Shader {
 
   // destroy shaders, program
   void destroy() {
+    spdlog::info("[Shader] destroy");
+
     if (this->vertexShader) {
       this->destroyVertexShader();
     }

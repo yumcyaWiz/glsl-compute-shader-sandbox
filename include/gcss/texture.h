@@ -35,11 +35,6 @@ class Texture {
     glBindTexture(GL_TEXTURE_2D, 0);
   }
 
-  ~Texture() {
-    spdlog::info("[Texture] destory");
-    destroy();
-  }
-
   GLuint getTextureName() const { return this->texture; }
 
   GLint getInternalFormat() const { return this->internalFormat; }
@@ -57,6 +52,8 @@ class Texture {
 
   // destroy texture object
   void destroy() {
+    spdlog::info("[Texture] destroy");
+
     glDeleteTextures(1, &this->texture);
     this->texture = 0;
   }

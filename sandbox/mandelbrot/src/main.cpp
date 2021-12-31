@@ -46,6 +46,7 @@ void handleInput(GLFWwindow* window, const ImGuiIO& io) {
   // camera look around
   if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
     // camera->lookAround(io.MouseDelta.x, io.MouseDelta.y);
+    RENDERER->move(glm::vec2(io.MouseDelta.x, io.MouseDelta.y));
   }
 }
 
@@ -122,6 +123,8 @@ int main() {
   }
 
   // cleanup
+  RENDERER->destroy();
+
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();
   ImGui::DestroyContext();

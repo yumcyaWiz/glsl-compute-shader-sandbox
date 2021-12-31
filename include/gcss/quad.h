@@ -52,12 +52,9 @@ class Quad {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   }
 
-  ~Quad() {
-    spdlog::info("[Quad] destroy");
-    destroy();
-  }
-
   void destroy() {
+    spdlog::info("[Quad] destroy");
+
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
     glDeleteVertexArrays(1, &VAO);

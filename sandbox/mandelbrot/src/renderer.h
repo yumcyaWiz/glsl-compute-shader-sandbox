@@ -44,6 +44,13 @@ class Renderer {
     renderShader.linkShader();
   }
 
+  void destroy() {
+    texture.destroy();
+    quad.destroy();
+    mandelbrotShader.destroy();
+    renderShader.destroy();
+  }
+
   void setResolution(const glm::uvec2& resolution) {
     this->resolution = resolution;
 
