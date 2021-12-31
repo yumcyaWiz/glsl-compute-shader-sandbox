@@ -12,14 +12,15 @@
 //
 #include "renderer.h"
 
-std::unique_ptr<Renderer> renderer;
+std::unique_ptr<Renderer> RENDERER;
+int MAX_ITERATIONS = 100;
 
 static void glfwErrorCallback(int error, const char* description) {
   fprintf(stderr, "Glfw Error %d: %s\n", error, description);
 }
 
 static void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
-  renderer->setResolution(glm::uvec2(width, height));
+  RENDERER->setResolution(glm::uvec2(width, height));
 }
 
 int main() {
@@ -64,7 +65,7 @@ int main() {
   ImGui_ImplOpenGL3_Init("#version 460 core");
 
   // init renderer
-  renderer = std::make_unique<Renderer>();
+  RENDERER = std::make_unique<Renderer>();
 
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
@@ -75,10 +76,12 @@ int main() {
     ImGui::NewFrame();
 
     ImGui::Begin("UI");
+    { ImGui::InputInt("Max iterations", &MAX_ITERATIONS); }
     ImGui::End();
 
     // render
-    renderer->render();
+    RENDERER->setMaxIterations(MAX_ITERATIONS);
+    RENDERER->render();
 
     // render imgui
     ImGui::Render();

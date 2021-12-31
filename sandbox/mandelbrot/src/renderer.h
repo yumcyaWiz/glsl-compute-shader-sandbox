@@ -1,5 +1,6 @@
 #ifndef _RENDERER_H
 #define _RENDERER_H
+#include <algorithm>
 
 #include "glad/gl.h"
 #include "glm/glm.hpp"
@@ -12,6 +13,9 @@ using namespace gcss;
 class Renderer {
  private:
   glm::uvec2 resolution;
+  glm::vec2 center;
+  float scale;
+  uint32_t maxIterations;
 
   Texture texture;
 
@@ -20,7 +24,8 @@ class Renderer {
   Shader renderShader;
 
  public:
-  Renderer() : resolution{512, 512} {
+  Renderer()
+      : resolution{512, 512}, center{0, 0}, scale{1.0f}, maxIterations{100u} {
     texture = Texture(resolution, GL_RGBA32F, GL_RGBA, GL_FLOAT);
 
     mandelbrotShader.setComputeShader(
@@ -44,12 +49,20 @@ class Renderer {
     texture.setResolution(this->resolution);
   }
 
+  void move(const glm::vec2& v) { center += scale * v; }
+
+  void setScale(float scale) { this->scale = scale; }
+
+  void setMaxIterations(uint32_t n_iterations) {
+    this->maxIterations = std::min(n_iterations, 10000u);
+  }
+
   void render() const {
     // run compute shader
     mandelbrotShader.setImageTexture(texture, 0, GL_WRITE_ONLY);
-    mandelbrotShader.setUniform("center", glm::vec2(0));
-    mandelbrotShader.setUniform("scale", 1.0f);
-    mandelbrotShader.setUniform("max_iterations", 100u);
+    mandelbrotShader.setUniform("center", center);
+    mandelbrotShader.setUniform("scale", scale);
+    mandelbrotShader.setUniform("max_iterations", maxIterations);
     mandelbrotShader.run(resolution.x / 8, resolution.y / 8, 1);
 
     // render quad
