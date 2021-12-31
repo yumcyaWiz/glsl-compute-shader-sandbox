@@ -42,10 +42,6 @@ void handleInput(GLFWwindow* window, const ImGuiIO& io) {
   }
 }
 
-static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
-  RENDERER->zoom(0.01f * yoffset);
-}
-
 int main() {
   // init glfw
   glfwSetErrorCallback(glfwErrorCallback);
@@ -68,7 +64,6 @@ int main() {
   glfwSwapInterval(1);  // enable vsync
 
   glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
-  glfwSetScrollCallback(window, scrollCallback);
 
   // init glad
   if (!gladLoadGL((GLADloadfunc)glfwGetProcAddress)) {
