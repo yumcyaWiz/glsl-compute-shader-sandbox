@@ -28,6 +28,10 @@ make
 
 ![](img/mandelbrot.jpg)
 
+### life-game
+
+![](img/life-game.jpg)
+
 ## Externals
 
 * [glad](https://github.com/Dav1dde/glad)
