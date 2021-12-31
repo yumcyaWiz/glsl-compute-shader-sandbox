@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <iostream>
+#include <memory>
 
 #include "glad/gl.h"
 //
@@ -11,14 +12,17 @@
 //
 #include "renderer.h"
 
+std::unique_ptr<Renderer> renderer;
+
 static void glfwErrorCallback(int error, const char* description) {
   fprintf(stderr, "Glfw Error %d: %s\n", error, description);
 }
 
-int main() {
-  const uint32_t width = 512;
-  const uint32_t height = 512;
+static void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
+  renderer->setResolution(glm::uvec2(width, height));
+}
 
+int main() {
   // init glfw
   glfwSetErrorCallback(glfwErrorCallback);
   if (!glfwInit()) {
@@ -30,14 +34,15 @@ int main() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);  // required for Mac
-  glfwWindowHint(GLFW_SAMPLES, 4);                      // 4x MSAA
-  GLFWwindow* window =
-      glfwCreateWindow(width, height, "hello", nullptr, nullptr);
+  // glfwWindowHint(GLFW_SAMPLES, 4);                      // 4x MSAA
+  GLFWwindow* window = glfwCreateWindow(512, 512, "hello", nullptr, nullptr);
   if (!window) {
     return -1;
   }
   glfwMakeContextCurrent(window);
   glfwSwapInterval(1);  // enable vsync
+
+  glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
   // init glad
   if (!gladLoadGL((GLADloadfunc)glfwGetProcAddress)) {
@@ -58,7 +63,8 @@ int main() {
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init("#version 460 core");
 
-  Renderer renderer;
+  // init renderer
+  renderer = std::make_unique<Renderer>();
 
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
@@ -72,7 +78,7 @@ int main() {
     ImGui::End();
 
     // render
-    renderer.render();
+    renderer->render();
 
     // render imgui
     ImGui::Render();

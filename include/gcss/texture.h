@@ -44,8 +44,8 @@ class Texture {
     this->resolution = resolution;
 
     glBindTexture(GL_TEXTURE_2D, this->texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, this->internalFormat, resolution.x,
-                 resolution.y, 0, this->format, this->type, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, this->internalFormat, this->resolution.x,
+                 this->resolution.y, 0, this->format, this->type, nullptr);
     glBindTexture(GL_TEXTURE_2D, 0);
   }
 
