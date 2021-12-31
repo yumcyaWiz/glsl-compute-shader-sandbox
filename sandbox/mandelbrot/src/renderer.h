@@ -51,6 +51,12 @@ class Renderer {
     renderShader.destroy();
   }
 
+  glm::uvec2 getResolution() const { return this->resolution; }
+
+  glm::vec2 getCenter() const { return this->center; }
+
+  float getScale() const { return this->scale; }
+
   void setResolution(const glm::uvec2& resolution) {
     this->resolution = resolution;
 
@@ -60,7 +66,7 @@ class Renderer {
 
   void move(const glm::vec2& v) { center += scale * v; }
 
-  void setScale(float scale) { this->scale = scale; }
+  void zoom(float delta) { scale += scale * delta; }
 
   void setMaxIterations(uint32_t n_iterations) {
     this->maxIterations = std::min(n_iterations, 10000u);

@@ -14,6 +14,7 @@
 
 std::unique_ptr<Renderer> RENDERER;
 int MAX_ITERATIONS = 100;
+float SCALE = 1.0f;
 
 static void glfwErrorCallback(int error, const char* description) {
   fprintf(stderr, "Glfw Error %d: %s\n", error, description);
@@ -24,30 +25,25 @@ static void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
 }
 
 void handleInput(GLFWwindow* window, const ImGuiIO& io) {
-  // close application
+  // close window
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
     glfwSetWindowShouldClose(window, GLFW_TRUE);
   }
 
-  // camera movement
-  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-    // camera->move(CameraMovement::FORWARD, io.DeltaTime);
-  }
-  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-    // camera->move(CameraMovement::LEFT, io.DeltaTime);
-  }
-  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-    // camera->move(CameraMovement::BACKWARD, io.DeltaTime);
-  }
-  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-    // camera->move(CameraMovement::RIGHT, io.DeltaTime);
+  // move center
+  if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+    RENDERER->move(0.1f * io.DeltaTime *
+                   glm::vec2(-io.MouseDelta.x, io.MouseDelta.y));
   }
 
-  // camera look around
+  // zoom in/out
   if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
-    // camera->lookAround(io.MouseDelta.x, io.MouseDelta.y);
-    RENDERER->move(glm::vec2(io.MouseDelta.x, io.MouseDelta.y));
+    RENDERER->zoom(0.1f * io.DeltaTime * io.MouseDelta.y);
   }
+}
+
+static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
+  RENDERER->zoom(0.01f * yoffset);
 }
 
 int main() {
@@ -63,7 +59,8 @@ int main() {
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);  // required for Mac
   // glfwWindowHint(GLFW_SAMPLES, 4);                      // 4x MSAA
-  GLFWwindow* window = glfwCreateWindow(512, 512, "hello", nullptr, nullptr);
+  GLFWwindow* window =
+      glfwCreateWindow(512, 512, "mandelbrot", nullptr, nullptr);
   if (!window) {
     return -1;
   }
@@ -71,6 +68,7 @@ int main() {
   glfwSwapInterval(1);  // enable vsync
 
   glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+  glfwSetScrollCallback(window, scrollCallback);
 
   // init glad
   if (!gladLoadGL((GLADloadfunc)glfwGetProcAddress)) {
@@ -103,7 +101,20 @@ int main() {
     ImGui::NewFrame();
 
     ImGui::Begin("UI");
-    { ImGui::InputInt("Max iterations", &MAX_ITERATIONS); }
+    {
+      const glm::uvec2 resolution = RENDERER->getResolution();
+      ImGui::Text("Resolution: (%d, %d)", resolution.x, resolution.y);
+
+      const glm::vec2 center = RENDERER->getCenter();
+      ImGui::Text("Center: (%f, %f)", center.x, center.y);
+
+      const float scale = RENDERER->getScale();
+      ImGui::Text("Scale: %f", scale);
+
+      ImGui::Separator();
+
+      ImGui::InputInt("Max iterations", &MAX_ITERATIONS);
+    }
     ImGui::End();
 
     handleInput(window, io);

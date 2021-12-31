@@ -13,7 +13,7 @@ vec2 cmult(vec2 z1, vec2 z2) {
 void main() {
   ivec2 gidx = ivec2(gl_GlobalInvocationID.xy);
   ivec2 size = imageSize(image);
-  vec2 uv = (2.0*gidx - size) / size;
+  vec2 uv = (2.0*gidx - size) / size.y;
 
   vec2 c = center + scale * uv;
   vec2 z = vec2(0, 0);
