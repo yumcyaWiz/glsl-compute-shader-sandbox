@@ -232,10 +232,6 @@ class Shader {
     glActiveTexture(GL_TEXTURE0 + texture_unit_number);
     glBindTexture(GL_TEXTURE_2D, texture.getTextureName());
 
-    // set texture unit number on the uniform variable
-    const GLint location = glGetUniformLocation(program, uniform_name.c_str());
-    glUniform1i(location, texture_unit_number);
-
     deactivate();
   }
 
@@ -249,6 +245,20 @@ class Shader {
                        0, access, texture.getTextureFormat());
 
     deactivate();
+  }
+};
+
+class ComputeShader : public Shader {
+ public:
+  ComputeShader() {}
+
+  void run(GLuint work_groups_x, GLuint work_groups_y,
+           GLuint work_groups_z) const {
+    this->activate();
+    glDispatchCompute(work_groups_x, work_groups_y, work_groups_z);
+    this->deactivate();
+
+    glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
   }
 };
 

@@ -11,12 +11,12 @@ using namespace gcss;
 
 class Renderer {
  private:
-  glm::vec2 resolution;
+  glm::uvec2 resolution;
 
   Texture texture;
 
   Quad quad;
-  Shader helloShader;
+  ComputeShader helloShader;
   Shader renderShader;
 
  public:
@@ -26,6 +26,7 @@ class Renderer {
     helloShader.setComputeShader(
         std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
         "hello.comp");
+    helloShader.linkShader();
 
     renderShader.setVertexShader(
         std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
@@ -36,16 +37,19 @@ class Renderer {
     renderShader.linkShader();
   }
 
-  void setResolution(const glm::vec2& resolution) {
+  void setResolution(const glm::uvec2& resolution) {
     this->resolution = resolution;
   }
 
   void render() const {
+    // run compute shader
+    helloShader.setImageTexture(texture, 0, GL_WRITE_ONLY);
+    helloShader.run(resolution.x, resolution.y, 1);
+
+    // render quad
     glClear(GL_COLOR_BUFFER_BIT);
     glViewport(0, 0, resolution.x, resolution.y);
-
-    helloShader.setImageTexture(texture, 0, GL_WRITE_ONLY);
-
+    renderShader.setTexture("tex", texture, 0);
     quad.draw(renderShader);
   }
 };
