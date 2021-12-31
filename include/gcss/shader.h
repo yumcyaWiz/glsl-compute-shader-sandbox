@@ -242,7 +242,7 @@ class Shader {
     // bind texture to the specified image unit
     glActiveTexture(GL_TEXTURE0 + image_unit_number);
     glBindImageTexture(image_unit_number, texture.getTextureName(), 0, GL_FALSE,
-                       0, access, texture.getTextureFormat());
+                       0, access, texture.getInternalFormat());
 
     deactivate();
   }
