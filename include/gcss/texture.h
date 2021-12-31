@@ -42,8 +42,11 @@ class Texture {
 
   void setResolution(const glm::uvec2& resolution) {
     this->resolution = resolution;
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, resolution.x, resolution.y, 0,
-                 GL_RGBA, GL_FLOAT, nullptr);
+
+    glBindTexture(GL_TEXTURE_2D, this->texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, this->internalFormat, resolution.x,
+                 resolution.y, 0, this->format, this->type, nullptr);
+    glBindTexture(GL_TEXTURE_2D, 0);
   }
 
   // destroy texture object
