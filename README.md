@@ -40,3 +40,4 @@ make
 
 * [Compute Shader - OpenGL Wiki - Khronos Group](https://www.khronos.org/opengl/wiki/Compute_Shader)
 * [Compute Shaders - Anton's OpenGL 4 Tutorials](https://antongerdelan.net/opengl/compute.html)
+* [paulpela/life-opengl-compute](https://github.com/paulpela/life-opengl-compute)
