@@ -110,20 +110,20 @@ class Renderer {
       elapsed_time = 0;
 
       // update input cells
-      updateCells.setImageTexture(inputCells, 0, GL_READ_ONLY);
-      updateCells.setImageTexture(outputCells, 1, GL_WRITE_ONLY);
+      inputCells.bindToImageUnit(0, GL_READ_ONLY);
+      outputCells.bindToImageUnit(1, GL_WRITE_ONLY);
       updateCells.run(resolution.x / 8, resolution.y / 8, 1);
 
       // swap input cells and output cells
-      swapCells.setImageTexture(inputCells, 0, GL_READ_ONLY);
-      swapCells.setImageTexture(outputCells, 1, GL_WRITE_ONLY);
+      inputCells.bindToImageUnit(0, GL_READ_ONLY);
+      outputCells.bindToImageUnit(1, GL_WRITE_ONLY);
       swapCells.run(resolution.x / 8, resolution.y / 8, 1);
     }
 
     // render quad
     glClear(GL_COLOR_BUFFER_BIT);
     glViewport(0, 0, resolution.x, resolution.y);
-    renderShader.setImageTexture(outputCells, 0, GL_READ_ONLY);
+    outputCells.bindToImageUnit(0, GL_READ_ONLY);
     renderShader.setUniform("offset", offset);
     renderShader.setUniform("scale", scale);
     quad.draw(renderShader);

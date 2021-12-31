@@ -53,13 +53,13 @@ class Renderer {
 
   void render() const {
     // run compute shader
-    helloShader.setImageTexture(texture, 0, GL_WRITE_ONLY);
+    texture.bindToImageUnit(0, GL_WRITE_ONLY);
     helloShader.run(resolution.x, resolution.y, 1);
 
     // render quad
     glClear(GL_COLOR_BUFFER_BIT);
     glViewport(0, 0, resolution.x, resolution.y);
-    renderShader.setTexture("tex", texture, 0);
+    texture.bindToTextureUnit(0);
     quad.draw(renderShader);
   }
 };

@@ -225,29 +225,6 @@ class Shader {
 
     deactivate();
   }
-
-  void setTexture(const std::string& uniform_name, const Texture& texture,
-                  GLuint texture_unit_number) const {
-    activate();
-
-    // bind texture to the specified texture unit
-    glActiveTexture(GL_TEXTURE0 + texture_unit_number);
-    glBindTexture(GL_TEXTURE_2D, texture.getTextureName());
-
-    deactivate();
-  }
-
-  void setImageTexture(const Texture& texture, GLuint image_unit_number,
-                       GLenum access) const {
-    activate();
-
-    // bind texture to the specified image unit
-    glActiveTexture(GL_TEXTURE0 + image_unit_number);
-    glBindImageTexture(image_unit_number, texture.getTextureName(), 0, GL_FALSE,
-                       0, access, texture.getInternalFormat());
-
-    deactivate();
-  }
 };
 
 class ComputeShader : public Shader {

@@ -60,6 +60,19 @@ class Texture {
     glBindTexture(GL_TEXTURE_2D, 0);
   }
 
+  // bind texture to the specified texture unit
+  void bindToTextureUnit(GLuint texture_unit_number) const {
+    glActiveTexture(GL_TEXTURE0 + texture_unit_number);
+    glBindTexture(GL_TEXTURE_2D, this->texture);
+  }
+
+  // bind texture to the specified image unit
+  void bindToImageUnit(GLuint image_unit_number, GLenum access) const {
+    glActiveTexture(GL_TEXTURE0 + image_unit_number);
+    glBindImageTexture(image_unit_number, this->texture, 0, GL_FALSE, 0, access,
+                       this->internalFormat);
+  }
+
   // destroy texture object
   void destroy() {
     spdlog::info("[Texture] destroy");
