@@ -93,7 +93,22 @@ int main() {
     ImGui::NewFrame();
 
     ImGui::Begin("UI");
-    {}
+    {
+      const glm::uvec2 resolution = RENDERER->getResolution();
+      ImGui::Text("Resolution: (%d, %d)", resolution.x, resolution.y);
+
+      const glm::vec2 offset = RENDERER->getOffset();
+      ImGui::Text("Offset: (%f, %f)", offset.x, offset.y);
+
+      const float scale = RENDERER->getScale();
+      ImGui::Text("Scale: %f", scale);
+
+      ImGui::Separator();
+
+      if (ImGui::Button("Randomize cells")) {
+        RENDERER->randomizeCells();
+      }
+    }
     ImGui::End();
 
     handleInput(window, io);

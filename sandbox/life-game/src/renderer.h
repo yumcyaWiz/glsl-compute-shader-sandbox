@@ -77,6 +77,12 @@ class Renderer {
     renderShader.destroy();
   }
 
+  glm::uvec2 getResolution() const { return this->resolution; }
+
+  glm::vec2 getOffset() const { return this->offset; }
+
+  float getScale() const { return this->scale; }
+
   void setResolution(const glm::uvec2& resolution) {
     this->resolution = resolution;
     this->offset = 0.5f * glm::vec2(resolution);
