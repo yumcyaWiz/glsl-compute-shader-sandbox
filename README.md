@@ -4,6 +4,8 @@ Some examples of OpenGL compute shader.
 
 ## Requirements
 
+* C++ (>=20)
+* CMake (>= 3.20)
 * OpenGL 4.6
 
 ## Build

@@ -43,6 +43,9 @@ class Renderer {
   void render() const {
     glClear(GL_COLOR_BUFFER_BIT);
     glViewport(0, 0, resolution.x, resolution.y);
+
+    helloShader.setImageTexture(texture, 0, GL_WRITE_ONLY);
+
     quad.draw(renderShader);
   }
 };
