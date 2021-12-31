@@ -23,6 +23,32 @@ static void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
   RENDERER->setResolution(glm::uvec2(width, height));
 }
 
+void handleInput(GLFWwindow* window, const ImGuiIO& io) {
+  // close application
+  if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+    glfwSetWindowShouldClose(window, GLFW_TRUE);
+  }
+
+  // camera movement
+  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+    // camera->move(CameraMovement::FORWARD, io.DeltaTime);
+  }
+  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+    // camera->move(CameraMovement::LEFT, io.DeltaTime);
+  }
+  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+    // camera->move(CameraMovement::BACKWARD, io.DeltaTime);
+  }
+  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+    // camera->move(CameraMovement::RIGHT, io.DeltaTime);
+  }
+
+  // camera look around
+  if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
+    // camera->lookAround(io.MouseDelta.x, io.MouseDelta.y);
+  }
+}
+
 int main() {
   // init glfw
   glfwSetErrorCallback(glfwErrorCallback);
@@ -78,6 +104,8 @@ int main() {
     ImGui::Begin("UI");
     { ImGui::InputInt("Max iterations", &MAX_ITERATIONS); }
     ImGui::End();
+
+    handleInput(window, io);
 
     // render
     RENDERER->setMaxIterations(MAX_ITERATIONS);

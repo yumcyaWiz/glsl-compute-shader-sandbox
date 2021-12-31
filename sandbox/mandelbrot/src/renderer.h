@@ -25,9 +25,11 @@ class Renderer {
 
  public:
   Renderer()
-      : resolution{512, 512}, center{0, 0}, scale{1.0f}, maxIterations{100u} {
-    texture = Texture(resolution, GL_RGBA32F, GL_RGBA, GL_FLOAT);
-
+      : resolution{512, 512},
+        center{0, 0},
+        scale{1.0f},
+        maxIterations{100u},
+        texture{glm::vec2(512, 512), GL_RGBA32F, GL_RGBA, GL_FLOAT} {
     mandelbrotShader.setComputeShader(
         std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
         "mandelbrot.comp");

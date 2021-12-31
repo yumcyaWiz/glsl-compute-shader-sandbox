@@ -14,6 +14,8 @@ class Quad {
 
  public:
   Quad() {
+    spdlog::info("[Quad] create quad");
+
     // setup VAO
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
@@ -50,6 +52,11 @@ class Quad {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   }
 
+  ~Quad() {
+    spdlog::info("[Quad] destroy");
+    destroy();
+  }
+
   void destroy() {
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
@@ -65,6 +72,6 @@ class Quad {
   }
 };
 
-}  // namespace css
+}  // namespace gcss
 
 #endif

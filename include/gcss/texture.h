@@ -23,6 +23,7 @@ class Texture {
         format(format),
         type(type) {
     // init texture
+    spdlog::info("[Texture] create texture");
     glGenTextures(1, &this->texture);
     glBindTexture(GL_TEXTURE_2D, this->texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -32,6 +33,11 @@ class Texture {
     glTexImage2D(GL_TEXTURE_2D, 0, this->internalFormat, this->resolution.x,
                  this->resolution.y, 0, this->format, this->type, nullptr);
     glBindTexture(GL_TEXTURE_2D, 0);
+  }
+
+  ~Texture() {
+    spdlog::info("[Texture] destory");
+    destroy();
   }
 
   GLuint getTextureName() const { return this->texture; }
