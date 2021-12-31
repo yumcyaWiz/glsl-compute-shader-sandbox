@@ -16,24 +16,29 @@ class Renderer {
  private:
   glm::uvec2 resolution;
 
-  Texture inputCell;
-  Texture outputCell;
+  Texture inputCells;
+  Texture outputCells;
 
   Quad quad;
-  ComputeShader lifeGameShader;
+  ComputeShader updateCells;
+  ComputeShader swapCells;
   Shader renderShader;
 
  public:
   Renderer()
       : resolution{512, 512},
-        inputCell{glm::uvec2(512, 512), GL_R8UI, GL_RED_INTEGER,
-                  GL_UNSIGNED_BYTE},
-        outputCell{glm::uvec2(512, 512), GL_R8UI, GL_RED_INTEGER,
-                   GL_UNSIGNED_BYTE} {
-    lifeGameShader.setComputeShader(
+        inputCells{glm::uvec2(512, 512), GL_R8UI, GL_RED_INTEGER,
+                   GL_UNSIGNED_BYTE},
+        outputCells{glm::uvec2(512, 512), GL_R8UI, GL_RED_INTEGER,
+                    GL_UNSIGNED_BYTE} {
+    updateCells.setComputeShader(
         std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
-        "life-game.comp");
-    lifeGameShader.linkShader();
+        "update-cells.comp");
+    updateCells.linkShader();
+
+    swapCells.setComputeShader(std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
+                               "shaders" / "swap-cells.comp");
+    swapCells.linkShader();
 
     renderShader.setVertexShader(
         std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
@@ -56,36 +61,42 @@ class Renderer {
     for (int i = 0; i < input_cell_image.size(); ++i) {
       input_cell_image[i] = dist(mt) > 0.5 ? 1 : 0;
     }
-    inputCell.setImage(input_cell_image);
+    inputCells.setImage(input_cell_image);
   }
 
   void destroy() {
-    inputCell.destroy();
-    outputCell.destroy();
+    inputCells.destroy();
+    outputCells.destroy();
     quad.destroy();
-    lifeGameShader.destroy();
+    updateCells.destroy();
+    swapCells.destroy();
     renderShader.destroy();
   }
 
   void setResolution(const glm::uvec2& resolution) {
     this->resolution = resolution;
 
-    inputCell.setResolution(this->resolution);
-    outputCell.setResolution(this->resolution);
+    inputCells.setResolution(this->resolution);
+    outputCells.setResolution(this->resolution);
 
     randomizeCells();
   }
 
   void render() const {
-    // run compute shader
-    lifeGameShader.setImageTexture(inputCell, 0, GL_READ_ONLY);
-    lifeGameShader.setImageTexture(outputCell, 1, GL_WRITE_ONLY);
-    lifeGameShader.run(resolution.x / 8, resolution.y / 8, 1);
+    // update input cells
+    updateCells.setImageTexture(inputCells, 0, GL_READ_ONLY);
+    updateCells.setImageTexture(outputCells, 1, GL_WRITE_ONLY);
+    updateCells.run(resolution.x / 8, resolution.y / 8, 1);
+
+    // swap input cells and output cells
+    swapCells.setImageTexture(inputCells, 0, GL_READ_ONLY);
+    swapCells.setImageTexture(outputCells, 1, GL_WRITE_ONLY);
+    swapCells.run(resolution.x / 8, resolution.y / 8, 1);
 
     // render quad
     glClear(GL_COLOR_BUFFER_BIT);
     glViewport(0, 0, resolution.x, resolution.y);
-    renderShader.setTexture("cell", outputCell, 0);
+    renderShader.setTexture("cell", outputCells, 0);
     quad.draw(renderShader);
   }
 };

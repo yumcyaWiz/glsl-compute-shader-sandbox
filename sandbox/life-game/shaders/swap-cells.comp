@@ -1,0 +1,14 @@
+#version 460 core
+layout(local_size_x = 8, local_size_y = 8) in;
+
+layout(r8ui, binding = 0) uniform uimage2D input_cells;
+layout(r8ui, binding = 1) uniform uimage2D output_cells;
+
+// swap input_cells and output_cells
+void main() {
+  ivec2 gidx = ivec2(gl_GlobalInvocationID.xy);
+
+  uint next_status = imageLoad(output_cells, gidx).x;
+
+  imageStore(input_cells, gidx, uvec4(next_status));
+}
