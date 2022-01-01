@@ -34,7 +34,7 @@ class Camera {
 
  public:
   Camera()
-      : camPos{0.0f, 0.0f, -1.0f},
+      : camPos{0.0f, 0.0f, 1.0f},
         camForward{0.0f, 0.0f, -1.0f},
         camRight{1.0f, 0.0f, 0.0f},
         camUp{0.0f, 1.0f, 0.0f},
@@ -51,8 +51,8 @@ class Camera {
   }
 
   glm::mat4 computeProjectionMatrix(uint32_t width, uint32_t height) const {
-    glm::perspective(glm::radians(fov), static_cast<float>(width) / height,
-                     znear, zfar);
+    return glm::perspective(glm::radians(fov),
+                            static_cast<float>(width) / height, znear, zfar);
   }
 
   glm::mat4 computeViewProjectionmatrix(uint32_t width, uint32_t height) const {
