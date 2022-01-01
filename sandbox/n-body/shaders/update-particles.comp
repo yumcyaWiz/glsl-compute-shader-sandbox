@@ -32,6 +32,7 @@ void main() {
 
   // update position, velocity
   vec3 a = m * F;
-  particles_out[gidx].velocity.xyz = particles_in[gidx].velocity.xyz + a * dt;
-  particles_out[gidx].position.xyz = particles_in[gidx].position.xyz + particles_in[gidx].velocity.xyz * dt;
+  // particles_out[gidx].velocity.xyz = particles_in[gidx].velocity.xyz + a * dt;
+  particles_out[gidx].velocity.xyz = particles_in[gidx].velocity.xyz;
+  particles_out[gidx].position.xyz = particles_in[gidx].position.xyz;
 }

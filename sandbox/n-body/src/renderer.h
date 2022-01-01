@@ -33,6 +33,7 @@ class Renderer {
   Particles particles;
 
   ComputeShader updateParticles;
+  ComputeShader swapParticles;
   Shader renderParticles;
 
  public:
@@ -42,6 +43,11 @@ class Renderer {
         std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
         "update-particles.comp");
     updateParticles.linkShader();
+
+    swapParticles.setComputeShader(
+        std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
+        "swap-particles.comp");
+    swapParticles.linkShader();
 
     renderParticles.setVertexShader(
         std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
@@ -60,6 +66,7 @@ class Renderer {
     particlesIn.destroy();
     particlesOut.destroy();
     updateParticles.destroy();
+    swapParticles.destroy();
     renderParticles.destroy();
   }
 
@@ -103,10 +110,12 @@ class Renderer {
     // update particles
     particlesIn.bindToShaderStorageBuffer(0);
     particlesOut.bindToShaderStorageBuffer(1);
+    updateParticles.setUniform("dt", 0.01f);
     updateParticles.run(std::ceil(nParticles / 128), 1, 1);
 
     // swap in/out particles
-    std::swap(particlesIn, particlesOut);
+    swapParticles.run(std::ceil(nParticles / 128), 1, 1);
+    // std::swap(particlesIn, particlesOut);
   }
 };
 

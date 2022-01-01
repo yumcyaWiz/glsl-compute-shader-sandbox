@@ -34,7 +34,7 @@ class Camera {
 
  public:
   Camera()
-      : camPos{0.0f},
+      : camPos{0.0f, 0.0f, -1.0f},
         camForward{0.0f, 0.0f, -1.0f},
         camRight{1.0f, 0.0f, 0.0f},
         camUp{0.0f, 1.0f, 0.0f},

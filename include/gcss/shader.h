@@ -237,7 +237,8 @@ class ComputeShader : public Shader {
     glDispatchCompute(work_groups_x, work_groups_y, work_groups_z);
     this->deactivate();
 
-    glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+    glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT |
+                    GL_SHADER_STORAGE_BARRIER_BIT);
   }
 };
 
