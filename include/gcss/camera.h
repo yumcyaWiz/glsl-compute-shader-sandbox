@@ -42,7 +42,7 @@ class Camera {
         znear{0.1f},
         zfar{10000.0f},
         movementSpeed{1.0f},
-        lookAroundSpeed{0.5f},
+        lookAroundSpeed{0.1f},
         phi{270.0f},
         theta{90.0f} {}
 

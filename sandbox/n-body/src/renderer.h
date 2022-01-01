@@ -82,7 +82,7 @@ class Renderer {
     std::uniform_real_distribution<float> dist(-1, 1);
 
     std::vector<Particle> data(nParticles);
-    for (int i = 0; i < data.size(); ++i) {
+    for (std::size_t i = 0; i < data.size(); ++i) {
       data[i].position = glm::vec4(dist(mt), dist(mt), dist(mt), 0);
       data[i].velocity = glm::vec4(dist(mt), dist(mt), dist(mt), 0);
     }
@@ -108,13 +108,13 @@ class Renderer {
     particles.draw(renderParticles);
 
     // update particles
-    particlesIn.bindToShaderStorageBuffer(0);
-    particlesOut.bindToShaderStorageBuffer(1);
-    updateParticles.setUniform("dt", 0.01f);
-    updateParticles.run(nParticles, 1, 1);
+    // particlesIn.bindToShaderStorageBuffer(0);
+    // particlesOut.bindToShaderStorageBuffer(1);
+    // updateParticles.setUniform("dt", 0.01f);
+    // updateParticles.run(nParticles, 1, 1);
 
     // swap in/out particles
-    swapParticles.run(nParticles, 1, 1);
+    // swapParticles.run(nParticles, 1, 1);
     // std::swap(particlesIn, particlesOut);
   }
 };

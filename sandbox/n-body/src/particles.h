@@ -44,6 +44,7 @@ class Particles {
 
     glBindVertexArray(VAO);
     glDrawArrays(GL_POINTS, 0, particles->getLength());
+    glBindVertexArray(0);
 
     shader.deactivate();
   }

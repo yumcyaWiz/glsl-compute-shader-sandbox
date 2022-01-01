@@ -18,7 +18,8 @@ static void glfwErrorCallback(int error, const char* description) {
   fprintf(stderr, "Glfw Error %d: %s\n", error, description);
 }
 
-static void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
+static void framebufferSizeCallback([[maybe_unused]] GLFWwindow* window,
+                                    int width, int height) {
   RENDERER->setResolution(glm::uvec2(width, height));
 }
 
@@ -40,6 +41,11 @@ void handleInput(GLFWwindow* window, const ImGuiIO& io) {
   }
   if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
     RENDERER->move(CameraMovement::RIGHT, io.DeltaTime);
+  }
+
+  // camera look around
+  if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+    RENDERER->lookAround(io.MouseDelta.x, io.MouseDelta.y);
   }
 }
 
