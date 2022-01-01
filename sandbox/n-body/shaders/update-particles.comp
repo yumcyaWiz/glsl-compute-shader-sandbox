@@ -18,20 +18,23 @@ uniform float dt;
 void main() {
   uint gidx = gl_GlobalInvocationID.x;
 
-  float m = 100;
-  float G = 6.67430 * 10e-11;
-  float EPS = 1e-6;
+  const float m = 10000;
+  const float G = 6.67430 * 10e-11;
+  const float EPS = 1e-6;
 
   // compute gravitational force
   vec3 F = vec3(0);
   for(int i = 0; i < particles_in.length(); ++i) {
     vec3 v = particles_in[i].position.xyz - particles_in[gidx].position.xyz;
     float l = length(v);
-    F += G * m * v / (l * l * l + EPS);
+    F += G * m * m * v / (l * l * l + EPS);
   }
 
-  // update position, velocity
-  vec3 a = m * F;
-  particles_out[gidx].velocity.xyz = particles_in[gidx].velocity.xyz + a * dt;
-  particles_out[gidx].position.xyz = particles_in[gidx].position.xyz + particles_in[gidx].velocity.xyz * dt;
+  // leap-frog scheme
+  vec3 a = F / m;
+  vec3 velocity = particles_in[gidx].velocity.xyz + a * dt;
+  vec3 position = particles_in[gidx].position.xyz + velocity * dt;
+
+  particles_out[gidx].position.xyz = position;
+  particles_out[gidx].velocity.xyz = velocity;
 }
