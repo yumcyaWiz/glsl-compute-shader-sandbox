@@ -19,12 +19,11 @@ class Renderer {
   float scale;
   uint32_t fps;
 
-  Texture inputCells;
-  Texture outputCells;
+  Texture cellsIn;
+  Texture cellsOut;
 
   Quad quad;
   ComputeShader updateCells;
-  ComputeShader swapCells;
   Shader renderShader;
 
   double elapsed_time;
@@ -35,18 +34,14 @@ class Renderer {
         offset{256, 256},
         scale{1},
         elapsed_time{0},
-        inputCells{glm::uvec2(512, 512), GL_R8UI, GL_RED_INTEGER,
-                   GL_UNSIGNED_BYTE},
-        outputCells{glm::uvec2(512, 512), GL_R8UI, GL_RED_INTEGER,
-                    GL_UNSIGNED_BYTE} {
+        cellsIn{glm::uvec2(512, 512), GL_R8UI, GL_RED_INTEGER,
+                GL_UNSIGNED_BYTE},
+        cellsOut{glm::uvec2(512, 512), GL_R8UI, GL_RED_INTEGER,
+                 GL_UNSIGNED_BYTE} {
     updateCells.setComputeShader(
         std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
         "update-cells.comp");
     updateCells.linkShader();
-
-    swapCells.setComputeShader(std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
-                               "shaders" / "swap-cells.comp");
-    swapCells.linkShader();
 
     renderShader.setVertexShader(
         std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
@@ -69,15 +64,14 @@ class Renderer {
     for (int i = 0; i < input_cell_image.size(); ++i) {
       input_cell_image[i] = dist(mt) > 0.5 ? 1 : 0;
     }
-    inputCells.setImage(input_cell_image);
+    cellsIn.setImage(input_cell_image);
   }
 
   void destroy() {
-    inputCells.destroy();
-    outputCells.destroy();
+    cellsIn.destroy();
+    cellsOut.destroy();
     quad.destroy();
     updateCells.destroy();
-    swapCells.destroy();
     renderShader.destroy();
   }
 
@@ -91,8 +85,8 @@ class Renderer {
     this->resolution = resolution;
     this->offset = 0.5f * glm::vec2(resolution);
 
-    inputCells.setResolution(this->resolution);
-    outputCells.setResolution(this->resolution);
+    cellsIn.setResolution(this->resolution);
+    cellsOut.setResolution(this->resolution);
 
     randomizeCells();
   }
@@ -104,29 +98,28 @@ class Renderer {
   void setFPS(uint32_t fps) { this->fps = fps; }
 
   void render(float delta_time) {
+    // render quad
+    glClear(GL_COLOR_BUFFER_BIT);
+    glViewport(0, 0, resolution.x, resolution.y);
+    cellsIn.bindToImageUnit(0, GL_READ_ONLY);
+    renderShader.setUniform("offset", offset);
+    renderShader.setUniform("scale", scale);
+    quad.draw(renderShader);
+
     // limit framerate
     elapsed_time += delta_time;
     if (elapsed_time > 1.0f / fps) {
       elapsed_time = 0;
 
       // update input cells
-      inputCells.bindToImageUnit(0, GL_READ_ONLY);
-      outputCells.bindToImageUnit(1, GL_WRITE_ONLY);
-      updateCells.run(resolution.x / 8, resolution.y / 8, 1);
+      cellsIn.bindToImageUnit(0, GL_READ_ONLY);
+      cellsOut.bindToImageUnit(1, GL_WRITE_ONLY);
+      updateCells.run(std::ceil(resolution.x / 8.0f),
+                      std::ceil(resolution.y / 8.0f), 1);
 
-      // swap input cells and output cells
-      inputCells.bindToImageUnit(0, GL_READ_ONLY);
-      outputCells.bindToImageUnit(1, GL_WRITE_ONLY);
-      swapCells.run(resolution.x / 8, resolution.y / 8, 1);
+      // swap input/output texture
+      std::swap(cellsIn, cellsOut);
     }
-
-    // render quad
-    glClear(GL_COLOR_BUFFER_BIT);
-    glViewport(0, 0, resolution.x, resolution.y);
-    outputCells.bindToImageUnit(0, GL_READ_ONLY);
-    renderShader.setUniform("offset", offset);
-    renderShader.setUniform("scale", scale);
-    quad.draw(renderShader);
   }
 };
 
