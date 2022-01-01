@@ -5,6 +5,12 @@
 
 using namespace gcss;
 
+struct alignas(16) Particle {
+  glm::vec4 position;
+  glm::vec4 velocity;
+  float mass;
+};
+
 class Particles {
  private:
   GLuint VAO;
@@ -22,12 +28,12 @@ class Particles {
 
     // position
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat),
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Particle),
                           (GLvoid*)0);
 
     // velocity
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat),
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Particle),
                           (GLvoid*)(4 * sizeof(GLfloat)));
 
     glBindVertexArray(0);

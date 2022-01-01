@@ -15,11 +15,6 @@
 
 using namespace gcss;
 
-struct Particle {
-  glm::vec4 position;
-  glm::vec4 velocity;
-};
-
 class Renderer {
  private:
   glm::uvec2 resolution;
@@ -38,7 +33,7 @@ class Renderer {
 
  public:
   Renderer()
-      : resolution{512, 512}, nParticles{10000}, particles{&particlesIn} {
+      : resolution{512, 512}, nParticles{30000}, particles{&particlesIn} {
     updateParticles.setComputeShader(
         std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
         "update-particles.comp");
@@ -83,8 +78,9 @@ class Renderer {
 
     std::vector<Particle> data(nParticles);
     for (std::size_t i = 0; i < data.size(); ++i) {
-      data[i].position = glm::vec4(dist(mt), dist(mt), dist(mt), 0);
+      data[i].position = 2.0f * glm::vec4(dist(mt), dist(mt), dist(mt), 0);
       data[i].velocity = 0.1f * glm::vec4(dist(mt), dist(mt), dist(mt), 0);
+      data[i].mass = 10000.0f * 0.5f * (dist(mt) + 1.0f);
     }
 
     particlesIn.setData(data, GL_DYNAMIC_DRAW);
