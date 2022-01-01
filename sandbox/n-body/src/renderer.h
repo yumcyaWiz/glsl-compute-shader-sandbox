@@ -22,8 +22,8 @@ class Renderer {
   glm::uvec2 resolution;
   uint32_t nParticles;
 
-  ShaderStorageBuffer inputParticles;
-  ShaderStorageBuffer outputParticles;
+  Buffer particlesIn;
+  Buffer particlesOut;
 
   Quad quad;
   ComputeShader updateParticles;
@@ -55,8 +55,8 @@ class Renderer {
 
   void destroy() {
     quad.destroy();
-    inputParticles.destroy();
-    outputParticles.destroy();
+    particlesIn.destroy();
+    particlesOut.destroy();
     updateParticles.destroy();
     swapParticles.destroy();
     renderShader.destroy();
@@ -79,13 +79,13 @@ class Renderer {
       data[i].velocity = glm::vec4(dist(mt), dist(mt), dist(mt), 0);
     }
 
-    inputParticles.setData(data);
-    outputParticles.setData(data);
+    particlesIn.setData(data, GL_DYNAMIC_DRAW);
+    particlesOut.setData(data, GL_DYNAMIC_DRAW);
   }
 
   void render() const {
-    inputParticles.bind(0);
-    outputParticles.bind(1);
+    particlesIn.bindToShaderStorageBuffer(0);
+    particlesOut.bindToShaderStorageBuffer(1);
     updateParticles.run(nParticles / 128, 1, 1);
 
     swapParticles.run(nParticles / 128, 1, 1);

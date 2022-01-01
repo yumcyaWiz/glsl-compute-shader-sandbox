@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "glad/gl.h"
+#include "spdlog/spdlog.h"
 
 namespace gcss {
 
@@ -11,24 +12,25 @@ class Buffer {
   GLuint buffer;
 
  public:
-  Buffer() { glGenBuffers(1, &buffer); }
+  Buffer() {
+    spdlog::info("[Buffer] create buffer");
 
-  void destroy() { glDeleteBuffers(1, &buffer); }
-};
-
-class ShaderStorageBuffer : public Buffer {
- public:
-  ShaderStorageBuffer() : Buffer() {}
-
-  template <typename T>
-  void setData(const std::vector<T>& data) const {
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, buffer);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(T) * data.size(), data.data(),
-                 GL_STATIC_DRAW);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+    glGenBuffers(1, &buffer);
   }
 
-  void bind(GLuint binding_point_index) const {
+  void destroy() {
+    spdlog::info("[Buffer] destroy buffer");
+
+    glDeleteBuffers(1, &buffer);
+    this->buffer = 0;
+  }
+
+  template <typename T>
+  void setData(const std::vector<T>& data, GLenum usage) const {
+    glNamedBufferData(buffer, sizeof(T) * data.size(), data.data(), usage);
+  }
+
+  void bindToShaderStorageBuffer(GLuint binding_point_index) const {
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, binding_point_index, buffer);
   }
 };
