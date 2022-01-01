@@ -1,5 +1,5 @@
 #version 460 core
-layout(local_size_x = 128) in;
+layout(local_size_x = 1) in;
 
 struct Particle {
   vec4 position;
@@ -34,5 +34,5 @@ void main() {
   vec3 a = m * F;
   // particles_out[gidx].velocity.xyz = particles_in[gidx].velocity.xyz + a * dt;
   particles_out[gidx].velocity.xyz = particles_in[gidx].velocity.xyz;
-  particles_out[gidx].position.xyz = particles_in[gidx].position.xyz;
+  particles_out[gidx].position.xyz = particles_in[gidx].position.xyz; // + particles_in[gidx].velocity.xyz * dt;
 }

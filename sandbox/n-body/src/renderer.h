@@ -111,10 +111,10 @@ class Renderer {
     particlesIn.bindToShaderStorageBuffer(0);
     particlesOut.bindToShaderStorageBuffer(1);
     updateParticles.setUniform("dt", 0.01f);
-    updateParticles.run(std::ceil(nParticles / 128), 1, 1);
+    updateParticles.run(nParticles, 1, 1);
 
     // swap in/out particles
-    swapParticles.run(std::ceil(nParticles / 128), 1, 1);
+    swapParticles.run(nParticles, 1, 1);
     // std::swap(particlesIn, particlesOut);
   }
 };
