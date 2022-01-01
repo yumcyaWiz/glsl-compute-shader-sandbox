@@ -78,7 +78,7 @@ class Renderer {
     mandelbrotShader.setUniform("center", center);
     mandelbrotShader.setUniform("scale", scale);
     mandelbrotShader.setUniform("max_iterations", maxIterations);
-    mandelbrotShader.run(resolution.x / 8, resolution.y / 8, 1);
+    mandelbrotShader.run(std::ceil(resolution.x / 8.0f), std::ceil(resolution.y / 8.0f), 1);
 
     // render quad
     glClear(GL_COLOR_BUFFER_BIT);
