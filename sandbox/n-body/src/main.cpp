@@ -100,6 +100,8 @@ int main() {
 
   glDebugMessageCallback(debugMessageCallback, 0);
 
+  glEnable(GL_PROGRAM_POINT_SIZE);
+
   // init imgui
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
