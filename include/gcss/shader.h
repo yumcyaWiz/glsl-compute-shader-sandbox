@@ -67,7 +67,7 @@ class Shader {
   }
 
  public:
-  Shader() {}
+  Shader() : vertexShader{0}, fragmentShader{0}, computeShader{0}, program{0} {}
 
   void setVertexShader(const std::filesystem::path& vertexShaderFilepath) {
     // delete previous shader
