@@ -18,6 +18,19 @@ static void glfwErrorCallback(int error, const char* description) {
   fprintf(stderr, "Glfw Error %d: %s\n", error, description);
 }
 
+void GLAPIENTRY debugMessageCallback(GLenum source, GLenum type, GLuint id,
+                                     GLenum severity, GLsizei length,
+                                     const GLchar* message,
+                                     const void* userParam) {
+  if (type == GL_DEBUG_TYPE_ERROR) {
+    spdlog::error("[GL] type = 0x{:x}, severity = 0x{:x}, message = {}", type,
+                  severity, message);
+  } else {
+    spdlog::info("[GL] type = 0x{:x}, severity = 0x{:x}, message = {}", type,
+                 severity, message);
+  }
+}
+
 static void framebufferSizeCallback([[maybe_unused]] GLFWwindow* window,
                                     int width, int height) {
   RENDERER->setResolution(glm::uvec2(width, height));
@@ -61,6 +74,13 @@ int main() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);  // required for Mac
+
+#ifdef NDEBUG
+  glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_FALSE);
+#else
+  glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+#endif
+
   GLFWwindow* window =
       glfwCreateWindow(512, 512, "life-game", nullptr, nullptr);
   if (!window) {
@@ -75,6 +95,8 @@ int main() {
     std::cerr << "failed to initialize OpenGL context" << std::endl;
     return -1;
   }
+
+  glDebugMessageCallback(debugMessageCallback, 0);
 
   // init imgui
   IMGUI_CHECKVERSION();
