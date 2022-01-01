@@ -84,10 +84,11 @@ class Renderer {
     std::vector<Particle> data(nParticles);
     for (std::size_t i = 0; i < data.size(); ++i) {
       data[i].position = glm::vec4(dist(mt), dist(mt), dist(mt), 0);
-      data[i].velocity = glm::vec4(dist(mt), dist(mt), dist(mt), 0);
+      data[i].velocity = 0.1f * glm::vec4(dist(mt), dist(mt), dist(mt), 0);
     }
 
     particlesIn.setData(data, GL_DYNAMIC_DRAW);
+    particlesOut.setData(data, GL_DYNAMIC_DRAW);
   }
 
   void move(const CameraMovement& movement_direction, float delta_time) {
@@ -108,13 +109,13 @@ class Renderer {
     particles.draw(renderParticles);
 
     // update particles
-    // particlesIn.bindToShaderStorageBuffer(0);
-    // particlesOut.bindToShaderStorageBuffer(1);
-    // updateParticles.setUniform("dt", 0.01f);
-    // updateParticles.run(nParticles, 1, 1);
+    particlesIn.bindToShaderStorageBuffer(0);
+    particlesOut.bindToShaderStorageBuffer(1);
+    updateParticles.setUniform("dt", 0.01f);
+    updateParticles.run(std::ceil(nParticles / 128.0f), 1, 1);
 
     // swap in/out particles
-    // swapParticles.run(nParticles, 1, 1);
+    swapParticles.run(std::ceil(nParticles / 128.0f), 1, 1);
     // std::swap(particlesIn, particlesOut);
   }
 };

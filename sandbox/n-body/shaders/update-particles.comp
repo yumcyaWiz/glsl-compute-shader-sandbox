@@ -1,5 +1,5 @@
 #version 460 core
-layout(local_size_x = 1) in;
+layout(local_size_x = 128) in;
 
 struct Particle {
   vec4 position;
@@ -18,7 +18,7 @@ uniform float dt;
 void main() {
   uint gidx = gl_GlobalInvocationID.x;
 
-  float m = 1.0;
+  float m = 100;
   float G = 6.67430 * 10e-11;
   float EPS = 1e-6;
 
@@ -32,7 +32,6 @@ void main() {
 
   // update position, velocity
   vec3 a = m * F;
-  // particles_out[gidx].velocity.xyz = particles_in[gidx].velocity.xyz + a * dt;
-  particles_out[gidx].velocity.xyz = particles_in[gidx].velocity.xyz;
-  particles_out[gidx].position.xyz = particles_in[gidx].position.xyz; // + particles_in[gidx].velocity.xyz * dt;
+  particles_out[gidx].velocity.xyz = particles_in[gidx].velocity.xyz + a * dt;
+  particles_out[gidx].position.xyz = particles_in[gidx].position.xyz + particles_in[gidx].velocity.xyz * dt;
 }

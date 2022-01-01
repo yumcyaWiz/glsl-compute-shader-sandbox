@@ -18,10 +18,12 @@ static void glfwErrorCallback(int error, const char* description) {
   fprintf(stderr, "Glfw Error %d: %s\n", error, description);
 }
 
-void GLAPIENTRY debugMessageCallback(GLenum source, GLenum type, GLuint id,
-                                     GLenum severity, GLsizei length,
+void GLAPIENTRY debugMessageCallback([[maybe_unused]] GLenum source,
+                                     GLenum type, [[maybe_unused]] GLuint id,
+                                     GLenum severity,
+                                     [[maybe_unused]] GLsizei length,
                                      const GLchar* message,
-                                     const void* userParam) {
+                                     [[maybe_unused]] const void* userParam) {
   if (type == GL_DEBUG_TYPE_ERROR) {
     spdlog::error("[GL] type = 0x{:x}, severity = 0x{:x}, message = {}", type,
                   severity, message);
