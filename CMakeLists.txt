@@ -23,6 +23,13 @@ target_link_libraries(gcss INTERFACE imgui_glfw_opengl3)
 target_link_libraries(gcss INTERFACE glm)
 target_link_libraries(gcss INTERFACE spdlog::spdlog)
 
+# compile options
+target_compile_options(gcss INTERFACE
+  $<$<CXX_COMPILER_ID:MSVC>:/W4>
+  $<$<CXX_COMPILER_ID:GNU>:-Wall -Wextra -pedantic>
+  $<$<CXX_COMPILER_ID:Clang>:-Wall -Wextra -pedantic>
+)
+
 # sandbox
 add_subdirectory("sandbox")
 
