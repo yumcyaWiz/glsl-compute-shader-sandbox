@@ -32,6 +32,7 @@ class Camera {
   float phi;
   float theta;
 
+ public:
   Camera()
       : camPos{0.0f},
         camForward{0.0f, 0.0f, -1.0f},

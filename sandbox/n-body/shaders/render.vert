@@ -1,8 +1,10 @@
 #version 460 core
-layout (location = 0) in vec3 vPosition;
+layout (location = 0) in vec3 position;
 
 out vec2 texCoords;
 
+uniform mat4 viewProjection;
+
 void main() {
-  gl_Position = vec4(vPosition, 1.0);
+  gl_Position = viewProjection * vec4(position, 1.0);
 }

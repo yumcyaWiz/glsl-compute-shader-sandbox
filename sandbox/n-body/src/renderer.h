@@ -7,6 +7,7 @@
 #include "glm/glm.hpp"
 //
 #include "gcss/buffer.h"
+#include "gcss/camera.h"
 #include "gcss/quad.h"
 #include "gcss/shader.h"
 //
@@ -23,6 +24,8 @@ class Renderer {
  private:
   glm::uvec2 resolution;
   uint32_t nParticles;
+
+  Camera camera;
 
   Buffer particlesIn;
   Buffer particlesOut;
@@ -80,10 +83,21 @@ class Renderer {
     particlesIn.setData(data, GL_DYNAMIC_DRAW);
   }
 
+  void move(const CameraMovement& movement_direction, float delta_time) {
+    camera.move(movement_direction, delta_time);
+  }
+
+  void lookAround(float d_phi, float d_theta) {
+    camera.lookAround(d_phi, d_theta);
+  }
+
   void render() {
     // render particles
     glClear(GL_COLOR_BUFFER_BIT);
     glViewport(0, 0, resolution.x, resolution.y);
+    renderParticles.setUniform(
+        "viewProjection",
+        camera.computeViewProjectionmatrix(resolution.x, resolution.y));
     particles.draw(renderParticles);
 
     // update particles

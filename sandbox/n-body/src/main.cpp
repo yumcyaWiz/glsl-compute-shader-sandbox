@@ -27,6 +27,20 @@ void handleInput(GLFWwindow* window, const ImGuiIO& io) {
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
     glfwSetWindowShouldClose(window, GLFW_TRUE);
   }
+
+  // move camera
+  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+    RENDERER->move(CameraMovement::FORWARD, io.DeltaTime);
+  }
+  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+    RENDERER->move(CameraMovement::LEFT, io.DeltaTime);
+  }
+  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+    RENDERER->move(CameraMovement::BACKWARD, io.DeltaTime);
+  }
+  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+    RENDERER->move(CameraMovement::RIGHT, io.DeltaTime);
+  }
 }
 
 int main() {
