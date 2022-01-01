@@ -14,13 +14,13 @@ class Buffer {
 
  public:
   Buffer() : size{0} {
-    spdlog::info("[Buffer] create buffer");
+    glCreateBuffers(1, &buffer);
 
-    glGenBuffers(1, &buffer);
+    spdlog::info("[Buffer] created buffer {:x}", buffer);
   }
 
   void destroy() {
-    spdlog::info("[Buffer] destroy buffer");
+    spdlog::info("[Buffer] destroy buffer {:x}", buffer);
 
     glDeleteBuffers(1, &buffer);
     this->buffer = 0;
@@ -32,7 +32,8 @@ class Buffer {
 
   template <typename T>
   void setData(const std::vector<T>& data, GLenum usage) {
-    glNamedBufferData(buffer, sizeof(T) * data.size(), data.data(), usage);
+    glNamedBufferData(this->buffer, sizeof(T) * data.size(), data.data(),
+                      usage);
     this->size = data.size();
   }
 
