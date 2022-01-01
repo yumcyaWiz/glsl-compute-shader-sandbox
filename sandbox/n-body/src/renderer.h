@@ -9,6 +9,8 @@
 #include "gcss/buffer.h"
 #include "gcss/quad.h"
 #include "gcss/shader.h"
+//
+#include "particles.h"
 
 using namespace gcss;
 
@@ -27,7 +29,6 @@ class Renderer {
 
   Quad quad;
   ComputeShader updateParticles;
-  ComputeShader swapParticles;
   Shader renderShader;
 
  public:
