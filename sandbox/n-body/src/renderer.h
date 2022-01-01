@@ -37,11 +37,6 @@ class Renderer {
         "update-particles.comp");
     updateParticles.linkShader();
 
-    swapParticles.setComputeShader(
-        std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
-        "swap-particles.comp");
-    swapParticles.linkShader();
-
     renderShader.setVertexShader(
         std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
         "render.vert");
@@ -58,7 +53,6 @@ class Renderer {
     particlesIn.destroy();
     particlesOut.destroy();
     updateParticles.destroy();
-    swapParticles.destroy();
     renderShader.destroy();
   }
 
@@ -83,17 +77,19 @@ class Renderer {
     particlesOut.setData(data, GL_DYNAMIC_DRAW);
   }
 
-  void render() const {
-    particlesIn.bindToShaderStorageBuffer(0);
-    particlesOut.bindToShaderStorageBuffer(1);
-    updateParticles.run(nParticles / 128, 1, 1);
-
-    swapParticles.run(nParticles / 128, 1, 1);
-
+  void render() {
     // render quad
     glClear(GL_COLOR_BUFFER_BIT);
     glViewport(0, 0, resolution.x, resolution.y);
     quad.draw(renderShader);
+
+    // update particles
+    particlesIn.bindToShaderStorageBuffer(0);
+    particlesOut.bindToShaderStorageBuffer(1);
+    updateParticles.run(nParticles / 128, 1, 1);
+
+    // swap in/out particles
+    std::swap(particlesIn, particlesOut);
   }
 };
 
