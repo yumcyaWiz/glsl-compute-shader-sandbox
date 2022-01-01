@@ -27,34 +27,37 @@ class Renderer {
   Buffer particlesIn;
   Buffer particlesOut;
 
-  Quad quad;
+  Particles particles;
+
   ComputeShader updateParticles;
-  Shader renderShader;
+  Shader renderParticles;
 
  public:
-  Renderer() : resolution{512, 512}, nParticles{10000} {
+  Renderer()
+      : resolution{512, 512}, nParticles{10000}, particles{&particlesIn} {
     updateParticles.setComputeShader(
         std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
         "update-particles.comp");
     updateParticles.linkShader();
 
-    renderShader.setVertexShader(
+    renderParticles.setVertexShader(
         std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
         "render.vert");
-    renderShader.setFragmentShader(
+    renderParticles.setFragmentShader(
         std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
         "render.frag");
-    renderShader.linkShader();
+    renderParticles.linkShader();
 
+    // populate particles buffer
     randomizeParticles();
   }
 
   void destroy() {
-    quad.destroy();
+    particles.destroy();
     particlesIn.destroy();
     particlesOut.destroy();
     updateParticles.destroy();
-    renderShader.destroy();
+    renderParticles.destroy();
   }
 
   glm::uvec2 getResolution() const { return this->resolution; }
@@ -75,14 +78,13 @@ class Renderer {
     }
 
     particlesIn.setData(data, GL_DYNAMIC_DRAW);
-    particlesOut.setData(data, GL_DYNAMIC_DRAW);
   }
 
   void render() {
-    // render quad
+    // render particles
     glClear(GL_COLOR_BUFFER_BIT);
     glViewport(0, 0, resolution.x, resolution.y);
-    quad.draw(renderShader);
+    particles.draw(renderParticles);
 
     // update particles
     particlesIn.bindToShaderStorageBuffer(0);
