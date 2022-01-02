@@ -76,11 +76,23 @@ class Renderer {
     std::mt19937 mt(rnd_dev());
     std::uniform_real_distribution<float> dist(-1, 1);
 
+    const int grid_size = std::sqrt(nParticles);
     std::vector<Particle> data(nParticles);
-    for (std::size_t i = 0; i < data.size(); ++i) {
-      data[i].position = 2.0f * glm::vec4(dist(mt), dist(mt), dist(mt), 0);
-      data[i].velocity = 0.1f * glm::vec4(dist(mt), dist(mt), dist(mt), 0);
-      data[i].mass = 10000.0f * 0.5f * (dist(mt) + 1.0f);
+    for (std::size_t idx = 0; idx < data.size(); ++idx) {
+      const int i = idx % grid_size;
+      const int j = (idx / grid_size) % grid_size;
+      const float u = (2.0f * i) / grid_size - 1.0f;
+      const float v = (2.0f * j) / grid_size - 1.0f;
+
+      const glm::vec3 position =
+          glm::vec3(u, v, 0) + 0.0f * glm::vec3(dist(mt), dist(mt), dist(mt));
+      const glm::vec3 velocity =
+          0.2f * glm::cross(glm::normalize(-position), glm::vec3(0, 0, 1));
+
+      data[idx].position = glm::vec4(position, 0);
+      data[idx].velocity = glm::vec4(velocity, 0);
+      data[idx].mass = 10000.0f * 0.5f * (dist(mt) + 1.0f);
+      // data[idx].mass = 10000.0f;
     }
 
     particlesIn.setData(data, GL_DYNAMIC_DRAW);
