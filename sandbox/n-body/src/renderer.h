@@ -19,6 +19,7 @@ class Renderer {
  private:
   glm::uvec2 resolution;
   uint32_t nParticles;
+  float dt;
 
   Camera camera;
 
@@ -34,7 +35,10 @@ class Renderer {
 
  public:
   Renderer()
-      : resolution{512, 512}, nParticles{30000}, particles{&particlesIn} {
+      : resolution{512, 512},
+        nParticles{30000},
+        particles{&particlesIn},
+        dt{0.5f} {
     initParticles.setComputeShader(
         std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
         "init-particles.comp");
@@ -59,8 +63,8 @@ class Renderer {
     renderParticles.linkShader();
 
     // populate particles buffer
-    randomizeParticles();
-    // placeParticlesCircle();
+    // randomizeParticles();
+    placeParticlesCircle();
   }
 
   void destroy() {
@@ -94,18 +98,18 @@ class Renderer {
       const float u = static_cast<float>(i) / grid_size;
       const float v = static_cast<float>(j) / grid_size;
 
-      const float r = u + 0.001f;
-      const float theta = 2.0f * 3.14f * v;
+      const float r = 0.5f * u * u + 0.1f * (dist(mt) + 1.0f);
+      const float theta = 2.0f * 3.14f * v + 0.1f * dist(mt);
 
+      const float mass = 1.0f * 0.5f * (dist(mt) + 1.0f);
       const glm::vec3 position =
-          r * glm::vec3(std::cos(theta), std::sin(theta), 0) +
-          0.01f * glm::vec3(dist(mt), dist(mt), dist(mt));
+          r * glm::vec3(std::cos(theta), std::sin(theta), 0.1f * dist(mt));
       const glm::vec3 velocity =
-          glm::vec3(-std::sin(theta), std::cos(theta), 0);
+          0.02f * r * glm::vec3(-std::sin(theta), std::cos(theta), 0);
 
       data[idx].position = glm::vec4(position, 0);
       data[idx].velocity = glm::vec4(velocity, 0);
-      data[idx].mass = 100.0f;
+      data[idx].mass = mass;
     }
     particlesIn.setData(data, GL_DYNAMIC_DRAW);
     particlesOut.setData(data, GL_DYNAMIC_DRAW);
@@ -146,7 +150,7 @@ class Renderer {
   void initVelocity() const {
     particlesIn.bindToShaderStorageBuffer(0);
     particlesOut.bindToShaderStorageBuffer(1);
-    initParticles.setUniform("dt", 0.01f);
+    initParticles.setUniform("dt", dt);
     initParticles.run(std::ceil(nParticles / 128.0f), 1, 1);
 
     // swap in/out particles
@@ -173,7 +177,7 @@ class Renderer {
     // update particles
     particlesIn.bindToShaderStorageBuffer(0);
     particlesOut.bindToShaderStorageBuffer(1);
-    updateParticles.setUniform("dt", 0.01f);
+    updateParticles.setUniform("dt", dt);
     updateParticles.run(std::ceil(nParticles / 128.0f), 1, 1);
 
     // swap in/out particles
