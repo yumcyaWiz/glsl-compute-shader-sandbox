@@ -23,8 +23,8 @@ void main() {
   vec3 velocity = particles_in[gidx].velocity.xyz;
   float mass = particles_in[gidx].mass;
 
-  const float G = 6.67430 * 10e-11;
-  const float EPS = 1e-8;
+  const float G = 6.67430e-11;
+  const float EPS = 1e-6;
 
   // compute gravitational force
   vec3 F = vec3(0);

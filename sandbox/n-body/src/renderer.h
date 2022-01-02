@@ -64,7 +64,7 @@ class Renderer {
 
     // populate particles buffer
     // randomizeParticles();
-    placeParticlesCircle();
+    placeParticlesCircular();
   }
 
   void destroy() {
@@ -85,7 +85,9 @@ class Renderer {
     this->resolution = resolution;
   }
 
-  void placeParticlesCircle() {
+  void placeParticlesCircular() {
+    const float black_hole_mass = 100000;
+
     std::random_device rnd_dev;
     std::mt19937 mt(rnd_dev());
     std::uniform_real_distribution<float> dist(-1, 1);
@@ -98,19 +100,25 @@ class Renderer {
       const float u = static_cast<float>(i) / grid_size;
       const float v = static_cast<float>(j) / grid_size;
 
-      const float r = 0.5f * u * u + 0.1f * (dist(mt) + 1.0f);
+      const float r = 0.5f * (u + 0.1f * (dist(mt) + 1.0f));
       const float theta = 2.0f * 3.14f * v + 0.1f * dist(mt);
 
       const float mass = 1.0f * 0.5f * (dist(mt) + 1.0f);
       const glm::vec3 position =
           r * glm::vec3(std::cos(theta), std::sin(theta), 0.1f * dist(mt));
+      const float G = 6.67430e-11;
       const glm::vec3 velocity =
-          0.02f * r * glm::vec3(-std::sin(theta), std::cos(theta), 0);
+          std::sqrt((G * black_hole_mass) / r) *
+          glm::vec3(-std::sin(theta), std::cos(theta), 0);
 
       data[idx].position = glm::vec4(position, 0);
       data[idx].velocity = glm::vec4(velocity, 0);
       data[idx].mass = mass;
     }
+    data[0].position = glm::vec4(0);
+    data[0].velocity = glm::vec4(0);
+    data[0].mass = black_hole_mass;
+
     particlesIn.setData(data, GL_DYNAMIC_DRAW);
     particlesOut.setData(data, GL_DYNAMIC_DRAW);
 
