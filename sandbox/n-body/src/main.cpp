@@ -102,7 +102,7 @@ int main() {
 
   glEnable(GL_PROGRAM_POINT_SIZE);
   glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glBlendFunc(GL_ONE, GL_ONE);
 
   // init imgui
   IMGUI_CHECKVERSION();

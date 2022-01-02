@@ -6,5 +6,5 @@ uniform mat4 viewProjection;
 
 void main() {
   gl_Position = viewProjection * vec4(position.xyz, 1.0);
-  gl_PointSize = 10.0;
+  gl_PointSize = 64.0 / gl_Position.w;
 }
