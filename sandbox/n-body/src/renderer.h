@@ -27,6 +27,7 @@ class Renderer {
 
   Particles particles;
 
+  ComputeShader initParticles;
   ComputeShader updateParticles;
   ComputeShader swapParticles;
   Shader renderParticles;
@@ -34,6 +35,11 @@ class Renderer {
  public:
   Renderer()
       : resolution{512, 512}, nParticles{30000}, particles{&particlesIn} {
+    initParticles.setComputeShader(
+        std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
+        "init-particles.comp");
+    initParticles.linkShader();
+
     updateParticles.setComputeShader(
         std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
         "update-particles.comp");
@@ -53,14 +59,17 @@ class Renderer {
     renderParticles.linkShader();
 
     // populate particles buffer
-    // randomizeParticles();
-    placeParticlesCircle();
+    randomizeParticles();
+    // placeParticlesCircle();
   }
 
   void destroy() {
     particles.destroy();
+
     particlesIn.destroy();
     particlesOut.destroy();
+
+    initParticles.destroy();
     updateParticles.destroy();
     swapParticles.destroy();
     renderParticles.destroy();
@@ -100,6 +109,8 @@ class Renderer {
     }
     particlesIn.setData(data, GL_DYNAMIC_DRAW);
     particlesOut.setData(data, GL_DYNAMIC_DRAW);
+
+    initVelocity();
   }
 
   void randomizeParticles() {
@@ -124,14 +135,23 @@ class Renderer {
       data[idx].position = glm::vec4(position, 0);
       data[idx].velocity = glm::vec4(velocity, 0);
       data[idx].mass = 10000.0f * 0.5f * (dist(mt) + 1.0f);
-      // data[idx].mass = 10000.0f;
     }
 
     particlesIn.setData(data, GL_DYNAMIC_DRAW);
     particlesOut.setData(data, GL_DYNAMIC_DRAW);
+
+    initVelocity();
   }
 
-  void initVelocity() const {}
+  void initVelocity() const {
+    particlesIn.bindToShaderStorageBuffer(0);
+    particlesOut.bindToShaderStorageBuffer(1);
+    initParticles.setUniform("dt", 0.01f);
+    initParticles.run(std::ceil(nParticles / 128.0f), 1, 1);
+
+    // swap in/out particles
+    swapParticles.run(std::ceil(nParticles / 128.0f), 1, 1);
+  }
 
   void move(const CameraMovement& movement_direction, float delta_time) {
     camera.move(movement_direction, delta_time);

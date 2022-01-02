@@ -1,0 +1,42 @@
+#version 460 core
+layout(local_size_x = 128) in;
+
+struct Particle {
+  vec4 position;
+  vec4 velocity;
+  float mass;
+};
+
+layout(std430, binding = 0) buffer layout_particles_in {
+  Particle particles_in[];
+};
+
+layout(std430, binding = 1) buffer layout_particles_out {
+  Particle particles_out[];
+};
+
+uniform float dt;
+
+void main() {
+  uint gidx = gl_GlobalInvocationID.x;
+
+  vec3 position = particles_in[gidx].position.xyz;
+  vec3 velocity = particles_in[gidx].velocity.xyz;
+  float mass = particles_in[gidx].mass;
+
+  const float G = 6.67430 * 10e-11;
+  const float EPS = 1e-6;
+
+  // compute gravitational force
+  vec3 F = vec3(0);
+  for(int i = 0; i < particles_in.length(); ++i) {
+    vec3 v = particles_in[i].position.xyz - position;
+    float l = length(v);
+    F += G * mass * particles_in[i].mass * v / (l * l * l + EPS);
+  }
+
+  // init particle velocity
+  vec3 a = F / mass;
+  vec3 velocity_next = velocity - a * dt;
+  particles_out[gidx].velocity.xyz = velocity_next;
+}
