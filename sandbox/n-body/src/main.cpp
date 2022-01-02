@@ -89,6 +89,7 @@ int main() {
     return -1;
   }
   glfwMakeContextCurrent(window);
+  glfwSwapInterval(0);  // disable vsync
 
   glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
@@ -130,6 +131,10 @@ int main() {
 
     ImGui::Begin("UI");
     {
+      ImGui::Text("Framerate: %f", io.Framerate);
+
+      ImGui::Separator();
+
       static int N_PARTICLES = RENDERER->getNumberOfParticles();
       if (ImGui::InputInt("Number of particles", &N_PARTICLES)) {
         N_PARTICLES = std::clamp(N_PARTICLES, 0, 1000000);
@@ -140,6 +145,10 @@ int main() {
       if (ImGui::InputFloat("dt", &DT)) {
         DT = std::clamp(DT, 0.0f, 10000.0f);
         RENDERER->setDt(DT);
+      }
+
+      if (ImGui::Button("Reset particles")) {
+        RENDERER->resetParticles();
       }
     }
     ImGui::End();

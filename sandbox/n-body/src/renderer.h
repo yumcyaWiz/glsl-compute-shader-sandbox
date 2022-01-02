@@ -97,6 +97,8 @@ class Renderer {
 
   void setDt(float dt) { this->dt = dt; }
 
+  void resetParticles() { placeParticlesCircular(); }
+
   void placeParticlesCircular() {
     const float black_hole_mass = 100000;
 
