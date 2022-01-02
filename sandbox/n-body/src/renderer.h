@@ -62,7 +62,7 @@ class Renderer {
         "render.frag");
     renderParticles.linkShader();
 
-    // populate particles buffer
+    // generate particles
     placeParticlesCircular();
   }
 
@@ -82,6 +82,13 @@ class Renderer {
 
   void setResolution(const glm::uvec2& resolution) {
     this->resolution = resolution;
+  }
+
+  void setNumberOfParticles(uint32_t nParticles) {
+    this->nParticles = nParticles;
+
+    // regenerate particles
+    placeParticlesCircular();
   }
 
   void placeParticlesCircular() {

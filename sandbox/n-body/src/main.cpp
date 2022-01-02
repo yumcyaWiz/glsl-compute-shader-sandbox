@@ -129,7 +129,13 @@ int main() {
     ImGui::NewFrame();
 
     ImGui::Begin("UI");
-    {}
+    {
+      static int N_PARTICLES = 30000;
+      if (ImGui::InputInt("Number of particles", &N_PARTICLES)) {
+        N_PARTICLES = std::clamp(N_PARTICLES, 0, 1000000);
+        RENDERER->setNumberOfParticles(N_PARTICLES);
+      }
+    }
     ImGui::End();
 
     handleInput(window, io);
