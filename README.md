@@ -32,6 +32,10 @@ make
 
 ![](img/life-game.jpg)
 
+### n-body
+
+![](img/n-body.png)
+
 ## Externals
 
 * [glad](https://github.com/Dav1dde/glad)
