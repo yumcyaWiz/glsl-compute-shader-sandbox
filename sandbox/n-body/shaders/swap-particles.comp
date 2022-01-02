@@ -4,6 +4,7 @@ layout(local_size_x = 128) in;
 struct Particle {
   vec4 position;
   vec4 velocity;
+  vec4 force;
   float mass;
 };
 

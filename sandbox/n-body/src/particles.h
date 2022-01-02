@@ -6,9 +6,10 @@
 using namespace gcss;
 
 struct alignas(16) Particle {
-  glm::vec4 position;
-  glm::vec4 velocity;
-  float mass;
+  glm::vec4 position = glm::vec4(0);
+  glm::vec4 velocity = glm::vec4(0);
+  glm::vec4 force = glm::vec4(0);
+  float mass = 0;
 };
 
 class Particles {
@@ -28,13 +29,23 @@ class Particles {
 
     // position
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Particle),
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Particle),
                           (GLvoid*)0);
 
     // velocity
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Particle),
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Particle),
                           (GLvoid*)(4 * sizeof(GLfloat)));
+
+    // force
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Particle),
+                          (GLvoid*)(8 * sizeof(GLfloat)));
+
+    // mass
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(Particle),
+                          (GLvoid*)(12 * sizeof(GLfloat)));
 
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);

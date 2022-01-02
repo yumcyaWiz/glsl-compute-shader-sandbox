@@ -4,6 +4,7 @@ layout(local_size_x = 128) in;
 struct Particle {
   vec4 position;
   vec4 velocity;
+  vec4 force;
   float mass;
 };
 
@@ -38,4 +39,5 @@ void main() {
   vec3 a = F / mass;
   vec3 velocity_next = velocity - a * dt;
   particles_out[gidx].velocity.xyz = velocity_next;
+  particles_out[gidx].force.xyz = F;
 }
