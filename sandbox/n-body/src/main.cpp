@@ -130,10 +130,16 @@ int main() {
 
     ImGui::Begin("UI");
     {
-      static int N_PARTICLES = 30000;
+      static int N_PARTICLES = RENDERER->getNumberOfParticles();
       if (ImGui::InputInt("Number of particles", &N_PARTICLES)) {
         N_PARTICLES = std::clamp(N_PARTICLES, 0, 1000000);
         RENDERER->setNumberOfParticles(N_PARTICLES);
+      }
+
+      static float DT = RENDERER->getDt();
+      if (ImGui::InputFloat("dt", &DT)) {
+        DT = std::clamp(DT, 0.0f, 10000.0f);
+        RENDERER->setDt(DT);
       }
     }
     ImGui::End();

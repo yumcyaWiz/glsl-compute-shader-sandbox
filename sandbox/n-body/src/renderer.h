@@ -38,7 +38,7 @@ class Renderer {
       : resolution{512, 512},
         nParticles{30000},
         particles{&particlesIn},
-        dt{0.5f} {
+        dt{0.01f} {
     initParticles.setComputeShader(
         std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
         "init-particles.comp");
@@ -80,6 +80,10 @@ class Renderer {
 
   glm::uvec2 getResolution() const { return this->resolution; }
 
+  uint32_t getNumberOfParticles() const { return this->nParticles; }
+
+  float getDt() const { return this->dt; }
+
   void setResolution(const glm::uvec2& resolution) {
     this->resolution = resolution;
   }
@@ -90,6 +94,8 @@ class Renderer {
     // regenerate particles
     placeParticlesCircular();
   }
+
+  void setDt(float dt) { this->dt = dt; }
 
   void placeParticlesCircular() {
     const float black_hole_mass = 100000;
