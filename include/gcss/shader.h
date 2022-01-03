@@ -197,33 +197,40 @@ class Shader {
   void setUniform(const std::string& uniform_name,
                   const std::variant<bool, GLint, GLuint, GLfloat, glm::vec2,
                                      glm::vec3, glm::mat4>& value) const {
-    activate();
-
     // get location of uniform variable
     const GLint location = glGetUniformLocation(program, uniform_name.c_str());
 
     // set value
     struct Visitor {
+      GLuint program;
       GLint location;
-      Visitor(GLint location) : location(location) {}
+      Visitor(GLuint program, GLint location)
+          : program(program), location(location) {}
 
-      void operator()(bool value) { glUniform1i(location, value); }
-      void operator()(GLint value) { glUniform1i(location, value); }
-      void operator()(GLuint value) { glUniform1ui(location, value); }
-      void operator()(GLfloat value) { glUniform1f(location, value); }
+      void operator()(bool value) {
+        glProgramUniform1i(program, location, value);
+      }
+      void operator()(GLint value) {
+        glProgramUniform1i(program, location, value);
+      }
+      void operator()(GLuint value) {
+        glProgramUniform1ui(program, location, value);
+      }
+      void operator()(GLfloat value) {
+        glProgramUniform1f(program, location, value);
+      }
       void operator()(const glm::vec2& value) {
-        glUniform2fv(location, 1, glm::value_ptr(value));
+        glProgramUniform2fv(program, location, 1, glm::value_ptr(value));
       }
       void operator()(const glm::vec3& value) {
-        glUniform3fv(location, 1, glm::value_ptr(value));
+        glProgramUniform3fv(program, location, 1, glm::value_ptr(value));
       }
       void operator()(const glm::mat4& value) {
-        glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
+        glProgramUniformMatrix4fv(program, location, 1, GL_FALSE,
+                                  glm::value_ptr(value));
       }
     };
-    std::visit(Visitor{location}, value);
-
-    deactivate();
+    std::visit(Visitor{program, location}, value);
   }
 };
 
