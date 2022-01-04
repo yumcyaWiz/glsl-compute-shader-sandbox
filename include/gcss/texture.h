@@ -44,6 +44,8 @@ class Texture {
 
   GLenum getFormat() const { return this->format; }
 
+  GLenum getType() const { return this->type; }
+
   void setResolution(const glm::uvec2& resolution) {
     this->resolution = resolution;
 
