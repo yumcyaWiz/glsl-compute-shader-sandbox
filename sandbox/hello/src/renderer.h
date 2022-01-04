@@ -20,9 +20,9 @@ class Renderer {
   Shader renderShader;
 
  public:
-  Renderer() : resolution{512, 512} {
-    texture = Texture(resolution, GL_RGBA32F, GL_RGBA, GL_FLOAT);
-
+  Renderer()
+      : resolution{512, 512},
+        texture{resolution, GL_RGBA32F, GL_RGBA, GL_FLOAT} {
     helloShader.setComputeShader(
         std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
         "hello.comp");
