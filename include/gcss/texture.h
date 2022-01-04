@@ -78,10 +78,12 @@ class Texture {
 
   // destroy texture object
   void destroy() {
-    spdlog::info("[Texture] texture {:x} deleted", this->texture);
+    if (texture) {
+      spdlog::info("[Texture] texture {:x} deleted", this->texture);
 
-    glDeleteTextures(1, &this->texture);
-    this->texture = 0;
+      glDeleteTextures(1, &this->texture);
+      this->texture = 0;
+    }
   }
 };
 
