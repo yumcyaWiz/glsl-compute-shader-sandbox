@@ -29,9 +29,9 @@ class FrameBuffer {
     this->framebuffer = 0;
   }
 
-  void bindTexture(const Texture& texture, GLenum attachment) const {
-    glNamedFramebufferTexture(framebuffer, attachment, texture.getTextureName(),
-                              0);
+  void bindTexture(const Texture& texture, std::size_t attachment_index) const {
+    glNamedFramebufferTexture(framebuffer, attachments.at(attachment_index),
+                              texture.getTextureName(), 0);
   }
 
   void activate() const { glBindFramebuffer(GL_FRAMEBUFFER, framebuffer); }

@@ -192,8 +192,8 @@ class Renderer {
 
   void render() {
     // render particles
-    frameBuffer.bindTexture(fragColor, GL_COLOR_ATTACHMENT0);
-    frameBuffer.bindTexture(brightColor, GL_COLOR_ATTACHMENT1);
+    frameBuffer.bindTexture(fragColor, 0);
+    frameBuffer.bindTexture(brightColor, 1);
     frameBuffer.activate();
     renderParticles.setUniform(
         "viewProjection",
