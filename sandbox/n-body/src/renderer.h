@@ -27,6 +27,8 @@ class Renderer {
   Buffer particlesIn;
   Buffer particlesOut;
 
+  Texture fragColor;
+  Texture brightColor;
   FrameBuffer frameBuffer;
 
   ComputeShader initParticles;
@@ -35,7 +37,12 @@ class Renderer {
   Shader renderParticles;
 
  public:
-  Renderer() : resolution{512, 512}, nParticles{30000}, dt{0.01f} {
+  Renderer()
+      : resolution{512, 512},
+        nParticles{30000},
+        dt{0.01f},
+        fragColor{resolution, GL_RGBA32F, GL_RGBA, GL_FLOAT},
+        brightColor{resolution, GL_RGBA32F, GL_RGBA, GL_FLOAT} {
     particles.setParticles(&particlesIn);
 
     initParticles.setComputeShader(
@@ -71,6 +78,8 @@ class Renderer {
     particlesIn.destroy();
     particlesOut.destroy();
 
+    fragColor.destroy();
+    brightColor.destroy();
     frameBuffer.destroy();
 
     initParticles.destroy();
@@ -162,10 +171,14 @@ class Renderer {
     // render particles
     glClear(GL_COLOR_BUFFER_BIT);
     glViewport(0, 0, resolution.x, resolution.y);
+    frameBuffer.bindTexture(fragColor, GL_COLOR_ATTACHMENT0);
+    frameBuffer.bindTexture(brightColor, GL_COLOR_ATTACHMENT1);
+    frameBuffer.activate();
     renderParticles.setUniform(
         "viewProjection",
         camera.computeViewProjectionmatrix(resolution.x, resolution.y));
     particles.draw(renderParticles);
+    frameBuffer.deactivate();
 
     // update particles
     particlesIn.bindToShaderStorageBuffer(0);
