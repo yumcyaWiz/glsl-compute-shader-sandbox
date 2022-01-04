@@ -106,6 +106,8 @@ class Renderer {
     frameBuffer.destroy();
     renderParticles.destroy();
 
+    bloom.destroy();
+
     quad.destroy();
     renderShader.destroy();
   }

@@ -11,7 +11,6 @@ class Bloom {
   Texture fragColor;
   Texture brightColor;
   ComputeShader extractBrightColor;
-
   ComputeShader additiveBlend;
 
  public:
@@ -27,6 +26,14 @@ class Bloom {
         std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
         "post-process" / "additive-blend.comp");
     additiveBlend.linkShader();
+  }
+
+  void destroy() {
+    blur.destroy();
+    fragColor.destroy();
+    brightColor.destroy();
+    extractBrightColor.destroy();
+    additiveBlend.destroy();
   }
 
   void bloom(const Texture& tex_in) {
