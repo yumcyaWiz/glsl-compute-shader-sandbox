@@ -2,7 +2,7 @@
 layout(local_size_x = 8, local_size_y = 8) in;
 
 layout(rgba32f, binding = 0) uniform image2D imageIn;
-layout(rgba32f, binding = 0) uniform image2D imageOut;
+layout(rgba32f, binding = 1) uniform image2D imageOut;
 
 uniform bool horizontal;
 
@@ -13,7 +13,7 @@ void main() {
 
   vec3 ret = weights[0] * imageLoad(imageIn, gidx).xyz;
 
-  ivec2 direction = horizontal ? ivec2(1, 0) : ivec2(-1, 0);
+  ivec2 direction = horizontal ? ivec2(1, 0) : ivec2(0, 1);
   for(int i = 1; i < 5; ++i) {
     ret += weights[i] * imageLoad(imageIn, gidx + i * direction).xyz;
     ret += weights[i] * imageLoad(imageIn, gidx - i * direction).xyz;
