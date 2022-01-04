@@ -18,13 +18,13 @@ class Particles {
   const Buffer* particles;
 
  public:
-  Particles(const Buffer* particles) : particles{particles} { init(); }
+  Particles() { glCreateVertexArrays(1, &VAO); }
 
-  void init() {
+  void setParticles(const Buffer* particles) {
+    this->particles = particles;
+
     // setup VAO
-    glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
-
     glBindBuffer(GL_ARRAY_BUFFER, particles->getName());
 
     // position

@@ -23,10 +23,11 @@ class Renderer {
 
   Camera camera;
 
+  Particles particles;
   Buffer particlesIn;
   Buffer particlesOut;
 
-  Particles particles;
+  FrameBuffer frameBuffer;
 
   ComputeShader initParticles;
   ComputeShader updateParticles;
@@ -34,11 +35,9 @@ class Renderer {
   Shader renderParticles;
 
  public:
-  Renderer()
-      : resolution{512, 512},
-        nParticles{30000},
-        particles{&particlesIn},
-        dt{0.01f} {
+  Renderer() : resolution{512, 512}, nParticles{30000}, dt{0.01f} {
+    particles.setParticles(&particlesIn);
+
     initParticles.setComputeShader(
         std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
         "init-particles.comp");
@@ -71,6 +70,8 @@ class Renderer {
 
     particlesIn.destroy();
     particlesOut.destroy();
+
+    frameBuffer.destroy();
 
     initParticles.destroy();
     updateParticles.destroy();
