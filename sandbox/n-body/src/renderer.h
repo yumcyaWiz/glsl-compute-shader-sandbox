@@ -63,6 +63,12 @@ class Renderer {
         "swap-particles.comp");
     swapParticles.linkShader();
 
+    // NOTE: to use gl_PointSize
+    glEnable(GL_PROGRAM_POINT_SIZE);
+    // NOTE: blending
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE);
+
     renderParticles.setVertexShader(
         std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
         "render-particles.vert");
@@ -98,6 +104,7 @@ class Renderer {
     swapParticles.destroy();
 
     renderParticles.destroy();
+    quad.destroy();
     renderShader.destroy();
   }
 

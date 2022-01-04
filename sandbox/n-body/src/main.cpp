@@ -102,10 +102,6 @@ int main() {
 
   glDebugMessageCallback(debugMessageCallback, 0);
 
-  glEnable(GL_PROGRAM_POINT_SIZE);
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_ONE, GL_ONE);
-
   // init imgui
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
