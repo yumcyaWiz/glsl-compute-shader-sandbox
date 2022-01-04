@@ -21,9 +21,12 @@ class Bloom {
     extractBrightColor.setComputeShader(
         std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
         "post-process" / "extract-bright-color.comp");
+    extractBrightColor.linkShader();
+
     additiveBlend.setComputeShader(
         std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
         "post-process" / "additive-blend.comp");
+    additiveBlend.linkShader();
   }
 
   void bloom(const Texture& tex_in) {
@@ -40,7 +43,7 @@ class Bloom {
     tex_in.bindToImageUnit(0, GL_READ_ONLY);
     fragColor.bindToImageUnit(1, GL_WRITE_ONLY);
     brightColor.bindToImageUnit(2, GL_WRITE_ONLY);
-    extractBrightColor.setUniform("threshold", 1.0f);
+    extractBrightColor.setUniform("threshold", 0.1f);
     extractBrightColor.run(std::ceil(resolution.x / 8.0f),
                            std::ceil(resolution.y / 8.0f), 1);
 

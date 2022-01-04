@@ -29,18 +29,15 @@ class Renderer {
   Buffer particlesIn;
   Buffer particlesOut;
 
-  Texture fragColor;
   ComputeShader initParticles;
   ComputeShader updateParticles;
   ComputeShader swapParticles;
+
+  FrameBuffer frameBuffer;
+  Texture fragColor;
   Shader renderParticles;
 
-  ComputeShader extractBrightPixels;
-
-  Texture brightColor;
-  FrameBuffer frameBuffer;
-
-  GaussianBlur gaussianBlur;
+  Bloom bloom;
 
   Quad quad;
   Shader renderShader;
@@ -51,7 +48,6 @@ class Renderer {
         nParticles{30000},
         dt{0.01f},
         fragColor{resolution, GL_RGBA32F, GL_RGBA, GL_FLOAT},
-        brightColor{resolution, GL_RGBA32F, GL_RGBA, GL_FLOAT},
         frameBuffer{{GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1}} {
     particles.setParticles(&particlesIn);
 
@@ -102,16 +98,13 @@ class Renderer {
     particlesIn.destroy();
     particlesOut.destroy();
 
-    fragColor.destroy();
-    brightColor.destroy();
-    frameBuffer.destroy();
-
     initParticles.destroy();
     updateParticles.destroy();
     swapParticles.destroy();
-    renderParticles.destroy();
 
-    gaussianBlur.destroy();
+    fragColor.destroy();
+    frameBuffer.destroy();
+    renderParticles.destroy();
 
     quad.destroy();
     renderShader.destroy();
@@ -126,7 +119,6 @@ class Renderer {
   void setResolution(const glm::uvec2& resolution) {
     this->resolution = resolution;
     fragColor.setResolution(resolution);
-    brightColor.setResolution(resolution);
   }
 
   void setNumberOfParticles(uint32_t nParticles) {
@@ -199,7 +191,7 @@ class Renderer {
   }
 
   void render() {
-    // render particles
+    // render particles to fragColor texture
     frameBuffer.bindTexture(fragColor, 0);
     frameBuffer.activate();
     renderParticles.setUniform(
@@ -210,14 +202,12 @@ class Renderer {
     particles.draw(renderParticles);
     frameBuffer.deactivate();
 
-    // extract bright pixels
+    for (int i = 0; i < 10; ++i) {
+      bloom.bloom(fragColor);
+    }
 
-    // gaussian blur bright color texture
-    gaussianBlur.blur(fragColor);
-
-    // render
+    // render to display
     fragColor.bindToTextureUnit(0);
-    brightColor.bindToTextureUnit(1);
     glClear(GL_COLOR_BUFFER_BIT);
     glViewport(0, 0, resolution.x, resolution.y);
     quad.draw(renderShader);
@@ -230,7 +220,6 @@ class Renderer {
 
     // swap in/out particles
     swapParticles.run(std::ceil(nParticles / 128.0f), 1, 1);
-    // std::swap(particlesIn, particlesOut);
   }
 };
 
