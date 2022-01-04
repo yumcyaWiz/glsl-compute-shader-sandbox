@@ -10,10 +10,14 @@ namespace gcss {
 class FrameBuffer {
  private:
   GLuint framebuffer;
+  std::vector<GLenum> attachments;
 
  public:
-  FrameBuffer() {
+  FrameBuffer(const std::vector<GLenum> attachments)
+      : attachments(attachments) {
     glCreateFramebuffers(1, &framebuffer);
+    glNamedFramebufferDrawBuffers(framebuffer, this->attachments.size(),
+                                  this->attachments.data());
 
     spdlog::info("[FrameBuffer] framebuffer {:x} created", framebuffer);
   }

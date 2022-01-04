@@ -45,7 +45,8 @@ class Renderer {
         nParticles{30000},
         dt{0.01f},
         fragColor{resolution, GL_RGBA32F, GL_RGBA, GL_FLOAT},
-        brightColor{resolution, GL_RGBA32F, GL_RGBA, GL_FLOAT} {
+        brightColor{resolution, GL_RGBA32F, GL_RGBA, GL_FLOAT},
+        frameBuffer{{GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1}} {
     particles.setParticles(&particlesIn);
 
     initParticles.setComputeShader(
