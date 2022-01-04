@@ -36,6 +36,8 @@ class Texture {
     spdlog::info("[Texture] texture {:x} created", this->texture);
   }
 
+  glm::uvec2 getResolution() const { return this->resolution; }
+
   GLuint getTextureName() const { return this->texture; }
 
   GLint getInternalFormat() const { return this->internalFormat; }
