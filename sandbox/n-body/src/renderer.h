@@ -11,8 +11,6 @@
 #include "gcss/quad.h"
 #include "gcss/shader.h"
 //
-#include "bloom.h"
-#include "gaussian-blur.h"
 #include "particles.h"
 
 using namespace gcss;
@@ -32,23 +30,10 @@ class Renderer {
   ComputeShader initParticles;
   ComputeShader updateParticles;
   ComputeShader swapParticles;
-
-  FrameBuffer frameBuffer;
-  Texture fragColor;
   Shader renderParticles;
 
-  Bloom bloom;
-
-  Quad quad;
-  Shader renderShader;
-
  public:
-  Renderer()
-      : resolution{512, 512},
-        nParticles{30000},
-        dt{0.01f},
-        fragColor{resolution, GL_RGBA32F, GL_RGBA, GL_FLOAT},
-        frameBuffer{{GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1}} {
+  Renderer() : resolution{512, 512}, nParticles{30000}, dt{0.01f} {
     particles.setParticles(&particlesIn);
 
     initParticles.setComputeShader(
@@ -80,14 +65,6 @@ class Renderer {
         "render-particles.frag");
     renderParticles.linkShader();
 
-    renderShader.setVertexShader(
-        std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
-        "render.vert");
-    renderShader.setFragmentShader(
-        std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
-        "render.frag");
-    renderShader.linkShader();
-
     // generate particles
     placeParticlesCircular();
   }
@@ -101,15 +78,7 @@ class Renderer {
     initParticles.destroy();
     updateParticles.destroy();
     swapParticles.destroy();
-
-    fragColor.destroy();
-    frameBuffer.destroy();
     renderParticles.destroy();
-
-    bloom.destroy();
-
-    quad.destroy();
-    renderShader.destroy();
   }
 
   glm::uvec2 getResolution() const { return this->resolution; }
@@ -120,7 +89,6 @@ class Renderer {
 
   void setResolution(const glm::uvec2& resolution) {
     this->resolution = resolution;
-    fragColor.setResolution(resolution);
   }
 
   void setNumberOfParticles(uint32_t nParticles) {
@@ -193,26 +161,13 @@ class Renderer {
   }
 
   void render() {
-    // render particles to fragColor texture
-    frameBuffer.bindTexture(fragColor, 0);
-    frameBuffer.activate();
+    // render particles
     renderParticles.setUniform(
         "viewProjection",
         camera.computeViewProjectionmatrix(resolution.x, resolution.y));
     glClear(GL_COLOR_BUFFER_BIT);
     glViewport(0, 0, resolution.x, resolution.y);
     particles.draw(renderParticles);
-    frameBuffer.deactivate();
-
-    for (int i = 0; i < 10; ++i) {
-      bloom.bloom(fragColor);
-    }
-
-    // render to display
-    fragColor.bindToTextureUnit(0);
-    glClear(GL_COLOR_BUFFER_BIT);
-    glViewport(0, 0, resolution.x, resolution.y);
-    quad.draw(renderShader);
 
     // update particles
     particlesIn.bindToShaderStorageBuffer(0);
