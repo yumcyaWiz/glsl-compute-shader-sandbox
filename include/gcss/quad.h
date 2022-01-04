@@ -14,8 +14,6 @@ class Quad {
 
  public:
   Quad() {
-    spdlog::info("[Quad] create quad");
-
     // setup VAO
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
@@ -50,14 +48,20 @@ class Quad {
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    spdlog::info("[Quad] VAO {:x} created", VAO);
+    spdlog::info("[Quad] VBO {:x} created", VBO);
+    spdlog::info("[Quad] EBO {:x} created", EBO);
   }
 
   void destroy() {
-    spdlog::info("[Quad] destroy");
-
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
     glDeleteVertexArrays(1, &VAO);
+
+    spdlog::info("[Quad] VAO {:x} deleted", VAO);
+    spdlog::info("[Quad] VBO {:x} deleted", VBO);
+    spdlog::info("[Quad] EBO {:x} deleted", EBO);
   }
 
   void draw(const Shader& shader) const {

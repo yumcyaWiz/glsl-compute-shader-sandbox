@@ -49,19 +49,27 @@ class Shader {
   }
 
   void destroyVertexShader() {
+    spdlog::info("[Shader] vertex shader {:x} deleted", this->vertexShader);
+
     glDeleteShader(this->vertexShader);
     this->vertexShader = 0;
   }
   void destroyFragmentShader() {
+    spdlog::info("[Shader] fragment shader {:x} deleted", this->fragmentShader);
+
     glDeleteShader(this->fragmentShader);
     this->fragmentShader = 0;
   }
   void destroyComputeShader() {
+    spdlog::info("[Shader] compute shader {:x} deleted", this->computeShader);
+
     glDeleteShader(this->computeShader);
     this->computeShader = 0;
   }
 
   void destroyProgram() {
+    spdlog::info("[Shader] program {:x} deleted", this->program);
+
     glDeleteProgram(this->program);
     this->program = 0;
   }
@@ -86,6 +94,8 @@ class Shader {
     glShaderSource(this->vertexShader, 1, &vertex_shader_source_c, nullptr);
     glCompileShader(this->vertexShader);
     this->checkShaderCompilation(this->vertexShader);
+
+    spdlog::info("[Shader] vertex shader {:x} created", this->vertexShader);
   }
 
   void setFragmentShader(const std::filesystem::path& fragmentShaderFilepath) {
@@ -105,6 +115,8 @@ class Shader {
     glShaderSource(this->fragmentShader, 1, &fragment_shader_source_c, nullptr);
     glCompileShader(this->fragmentShader);
     this->checkShaderCompilation(this->fragmentShader);
+
+    spdlog::info("[Shader] compute shader {:x} created", this->fragmentShader);
   }
 
   void setComputeShader(const std::filesystem::path& computeShaderFilepath) {
@@ -124,6 +136,8 @@ class Shader {
     glShaderSource(this->computeShader, 1, &compute_shader_source_c, nullptr);
     glCompileShader(this->computeShader);
     this->checkShaderCompilation(this->computeShader);
+
+    spdlog::info("[Shader] compute shader {:x} created", this->computeShader);
   }
 
   // compile and link shaders
@@ -167,12 +181,12 @@ class Shader {
 
       glDeleteProgram(this->program);
     }
+
+    spdlog::info("[Shader] program {:x} created", this->program);
   }
 
   // destroy shaders, program
   void destroy() {
-    spdlog::info("[Shader] destroy");
-
     if (this->vertexShader) {
       this->destroyVertexShader();
     }
