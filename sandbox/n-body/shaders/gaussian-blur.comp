@@ -1,0 +1,23 @@
+#version 460 core
+layout(local_size_x = 8, local_size_y = 8) in;
+
+layout(rgba32f, binding = 0) uniform image2D imageIn;
+layout(rgba32f, binding = 0) uniform image2D imageOut;
+
+uniform bool horizontal;
+
+const float weights[5] = float[](0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216);
+
+void main() {
+  ivec2 gidx = ivec2(gl_GlobalInvocationID.xy);
+
+  vec3 ret = weights[0] * imageLoad(imageIn, gidx).xyz;
+
+  ivec2 direction = horizontal ? ivec2(1, 0) : ivec2(-1, 0);
+  for(int i = 1; i < 5; ++i) {
+    ret += weights[i] * imageLoad(imageIn, gidx + i * direction).xyz;
+    ret += weights[i] * imageLoad(imageIn, gidx - i * direction).xyz;
+  }
+
+  imageStore(imageOut, gidx, vec4(ret, 1.0));
+}
