@@ -13,7 +13,7 @@ class GaussianBlur {
  public:
   GaussianBlur() : texOut{glm::uvec2(512, 512), GL_RGBA32F, GL_RGBA, GL_FLOAT} {
     shader.setComputeShader(std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
-                            "shaders" / "gaussian-blur.comp");
+                            "shaders" / "post-process" / "gaussian-blur.comp");
     shader.linkShader();
   }
 

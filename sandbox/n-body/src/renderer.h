@@ -11,6 +11,8 @@
 #include "gcss/quad.h"
 #include "gcss/shader.h"
 //
+#include "bloom.h"
+#include "gaussian-blur.h"
 #include "particles.h"
 
 using namespace gcss;
@@ -28,14 +30,18 @@ class Renderer {
   Buffer particlesOut;
 
   Texture fragColor;
-  Texture brightColor;
-  FrameBuffer frameBuffer;
-
   ComputeShader initParticles;
   ComputeShader updateParticles;
   ComputeShader swapParticles;
-
   Shader renderParticles;
+
+  ComputeShader extractBrightPixels;
+
+  Texture brightColor;
+  FrameBuffer frameBuffer;
+
+  GaussianBlur gaussianBlur;
+
   Quad quad;
   Shader renderShader;
 
@@ -50,17 +56,17 @@ class Renderer {
     particles.setParticles(&particlesIn);
 
     initParticles.setComputeShader(
-        std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
+        std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" / "n-body" /
         "init-particles.comp");
     initParticles.linkShader();
 
     updateParticles.setComputeShader(
-        std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
+        std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" / "n-body" /
         "update-particles.comp");
     updateParticles.linkShader();
 
     swapParticles.setComputeShader(
-        std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
+        std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" / "n-body" /
         "swap-particles.comp");
     swapParticles.linkShader();
 
@@ -103,8 +109,10 @@ class Renderer {
     initParticles.destroy();
     updateParticles.destroy();
     swapParticles.destroy();
-
     renderParticles.destroy();
+
+    gaussianBlur.destroy();
+
     quad.destroy();
     renderShader.destroy();
   }
@@ -193,7 +201,6 @@ class Renderer {
   void render() {
     // render particles
     frameBuffer.bindTexture(fragColor, 0);
-    frameBuffer.bindTexture(brightColor, 1);
     frameBuffer.activate();
     renderParticles.setUniform(
         "viewProjection",
@@ -202,6 +209,11 @@ class Renderer {
     glViewport(0, 0, resolution.x, resolution.y);
     particles.draw(renderParticles);
     frameBuffer.deactivate();
+
+    // extract bright pixels
+
+    // gaussian blur bright color texture
+    gaussianBlur.blur(fragColor);
 
     // render
     fragColor.bindToTextureUnit(0);

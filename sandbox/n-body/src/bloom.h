@@ -20,10 +20,10 @@ class Bloom {
         brightColor{glm::uvec2(512, 512), GL_RGBA32F, GL_RGBA, GL_FLOAT} {
     extractBrightColor.setComputeShader(
         std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
-        "extract-bright-color.comp");
+        "post-process" / "extract-bright-color.comp");
     additiveBlend.setComputeShader(
         std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
-        "additive-blend.comp");
+        "post-process" / "additive-blend.comp");
   }
 
   void bloom(const Texture& tex_in) {
