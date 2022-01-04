@@ -34,7 +34,10 @@ class Renderer {
   ComputeShader initParticles;
   ComputeShader updateParticles;
   ComputeShader swapParticles;
+
   Shader renderParticles;
+  Quad quad;
+  Shader renderShader;
 
  public:
   Renderer()
@@ -62,11 +65,19 @@ class Renderer {
 
     renderParticles.setVertexShader(
         std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
-        "render.vert");
+        "render-particles.vert");
     renderParticles.setFragmentShader(
         std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
-        "render.frag");
+        "render-particles.frag");
     renderParticles.linkShader();
+
+    renderShader.setVertexShader(
+        std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
+        "render.vert");
+    renderShader.setFragmentShader(
+        std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
+        "render.frag");
+    renderShader.linkShader();
 
     // generate particles
     placeParticlesCircular();
@@ -85,7 +96,9 @@ class Renderer {
     initParticles.destroy();
     updateParticles.destroy();
     swapParticles.destroy();
+
     renderParticles.destroy();
+    renderShader.destroy();
   }
 
   glm::uvec2 getResolution() const { return this->resolution; }
@@ -96,6 +109,8 @@ class Renderer {
 
   void setResolution(const glm::uvec2& resolution) {
     this->resolution = resolution;
+    fragColor.setResolution(resolution);
+    brightColor.setResolution(resolution);
   }
 
   void setNumberOfParticles(uint32_t nParticles) {
@@ -169,16 +184,23 @@ class Renderer {
 
   void render() {
     // render particles
-    glClear(GL_COLOR_BUFFER_BIT);
-    glViewport(0, 0, resolution.x, resolution.y);
     frameBuffer.bindTexture(fragColor, GL_COLOR_ATTACHMENT0);
     frameBuffer.bindTexture(brightColor, GL_COLOR_ATTACHMENT1);
     frameBuffer.activate();
     renderParticles.setUniform(
         "viewProjection",
         camera.computeViewProjectionmatrix(resolution.x, resolution.y));
+    glClear(GL_COLOR_BUFFER_BIT);
+    glViewport(0, 0, resolution.x, resolution.y);
     particles.draw(renderParticles);
     frameBuffer.deactivate();
+
+    // render
+    fragColor.bindToTextureUnit(0);
+    brightColor.bindToTextureUnit(1);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glViewport(0, 0, resolution.x, resolution.y);
+    quad.draw(renderShader);
 
     // update particles
     particlesIn.bindToShaderStorageBuffer(0);

@@ -10,6 +10,7 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 //
+#include "gcss/framebuffer.h"
 #include "renderer.h"
 
 std::unique_ptr<Renderer> RENDERER;
@@ -89,7 +90,7 @@ int main() {
     return -1;
   }
   glfwMakeContextCurrent(window);
-  glfwSwapInterval(0);  // disable vsync
+  glfwSwapInterval(1);  // disable vsync
 
   glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
