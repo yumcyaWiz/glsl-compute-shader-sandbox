@@ -89,7 +89,7 @@ int main() {
     return -1;
   }
   glfwMakeContextCurrent(window);
-  glfwSwapInterval(1);  // disable vsync
+  glfwSwapInterval(0);  // disable vsync
 
   glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 

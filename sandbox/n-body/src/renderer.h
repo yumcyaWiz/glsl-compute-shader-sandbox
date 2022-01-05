@@ -29,7 +29,6 @@ class Renderer {
 
   ComputeShader initParticles;
   ComputeShader updateParticles;
-  ComputeShader swapParticles;
   Shader renderParticles;
 
  public:
@@ -45,11 +44,6 @@ class Renderer {
         std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" / "n-body" /
         "update-particles.comp");
     updateParticles.linkShader();
-
-    swapParticles.setComputeShader(
-        std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" / "n-body" /
-        "swap-particles.comp");
-    swapParticles.linkShader();
 
     // NOTE: to use gl_PointSize
     glEnable(GL_PROGRAM_POINT_SIZE);
@@ -130,14 +124,14 @@ class Renderer {
     initVelocity();
   }
 
-  void initVelocity() const {
+  void initVelocity() {
     particlesIn.bindToShaderStorageBuffer(0);
     particlesOut.bindToShaderStorageBuffer(1);
     initParticles.setUniform("dt", dt);
     initParticles.run(std::ceil(nParticles / 128.0f), 1, 1);
 
     // swap in/out particles
-    swapParticles.run(std::ceil(nParticles / 128.0f), 1, 1);
+    std::swap(particlesIn, particlesOut);
   }
 
   void move(const CameraMovement& movement_direction, float delta_time) {
@@ -164,7 +158,7 @@ class Renderer {
     updateParticles.run(std::ceil(nParticles / 128.0f), 1, 1);
 
     // swap in/out particles
-    swapParticles.run(std::ceil(nParticles / 128.0f), 1, 1);
+    std::swap(particlesIn, particlesOut);
   }
 };
 
