@@ -14,9 +14,9 @@ class Renderer {
   glm::uvec2 resolution;
 
   Texture texture;
+  ComputeShader helloShader;
 
   Quad quad;
-  ComputeShader helloShader;
   Shader renderShader;
 
  public:
@@ -35,13 +35,6 @@ class Renderer {
         std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
         "render.frag");
     renderShader.linkShader();
-  }
-
-  void destroy() {
-    texture.destroy();
-    quad.destroy();
-    helloShader.destroy();
-    renderShader.destroy();
   }
 
   void setResolution(const glm::uvec2& resolution) {

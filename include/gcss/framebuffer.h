@@ -13,20 +13,46 @@ class FrameBuffer {
   std::vector<GLenum> attachments;
 
  public:
-  FrameBuffer(const std::vector<GLenum> attachments)
+  FrameBuffer(const std::vector<GLenum>& attachments)
       : attachments(attachments) {
     glCreateFramebuffers(1, &framebuffer);
     glNamedFramebufferDrawBuffers(framebuffer, this->attachments.size(),
                                   this->attachments.data());
 
-    spdlog::info("[FrameBuffer] framebuffer {:x} created", framebuffer);
+    spdlog::info("[FrameBuffer] create framebuffer {:x}", framebuffer);
   }
 
-  void destroy() {
-    spdlog::info("[FrameBuffer] framebuffer {:x} deleted", framebuffer);
+  FrameBuffer(const FrameBuffer& other) = delete;
 
-    glDeleteFramebuffers(1, &framebuffer);
-    this->framebuffer = 0;
+  FrameBuffer(FrameBuffer&& other)
+      : framebuffer(other.framebuffer), attachments(other.attachments) {
+    other.framebuffer = 0;
+  }
+
+  ~FrameBuffer() { release(); }
+
+  FrameBuffer& operator=(const FrameBuffer& other) = delete;
+
+  FrameBuffer& operator=(FrameBuffer&& other) {
+    if (this != &other) {
+      release();
+
+      framebuffer = other.framebuffer;
+      attachments = std::move(other.attachments);
+
+      other.framebuffer = 0;
+    }
+
+    return *this;
+  }
+
+  void release() {
+    if (framebuffer) {
+      spdlog::info("[FrameBuffer] release framebuffer {:x}", framebuffer);
+
+      glDeleteFramebuffers(1, &framebuffer);
+      this->framebuffer = 0;
+    }
   }
 
   void bindTexture(const Texture& texture, std::size_t attachment_index) const {

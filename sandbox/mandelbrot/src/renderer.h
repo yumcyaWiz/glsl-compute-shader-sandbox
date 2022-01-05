@@ -18,9 +18,9 @@ class Renderer {
   uint32_t maxIterations;
 
   Texture texture;
+  ComputeShader mandelbrotShader;
 
   Quad quad;
-  ComputeShader mandelbrotShader;
   Shader renderShader;
 
  public:
@@ -42,13 +42,6 @@ class Renderer {
         std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
         "render.frag");
     renderShader.linkShader();
-  }
-
-  void destroy() {
-    texture.destroy();
-    quad.destroy();
-    mandelbrotShader.destroy();
-    renderShader.destroy();
   }
 
   glm::uvec2 getResolution() const { return this->resolution; }
@@ -78,7 +71,8 @@ class Renderer {
     mandelbrotShader.setUniform("center", center);
     mandelbrotShader.setUniform("scale", scale);
     mandelbrotShader.setUniform("max_iterations", maxIterations);
-    mandelbrotShader.run(std::ceil(resolution.x / 8.0f), std::ceil(resolution.y / 8.0f), 1);
+    mandelbrotShader.run(std::ceil(resolution.x / 8.0f),
+                         std::ceil(resolution.y / 8.0f), 1);
 
     // render quad
     glClear(GL_COLOR_BUFFER_BIT);

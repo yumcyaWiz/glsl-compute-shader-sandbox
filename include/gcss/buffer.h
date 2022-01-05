@@ -8,22 +8,47 @@
 namespace gcss {
 
 class Buffer {
- protected:
+ private:
   GLuint buffer;
   uint32_t size;
 
  public:
-  Buffer() : size{0} {
+  Buffer() : buffer{0}, size{0} {
     glCreateBuffers(1, &buffer);
 
     spdlog::info("[Buffer] created buffer {:x}", buffer);
   }
 
-  void destroy() {
-    spdlog::info("[Buffer] destroy buffer {:x}", buffer);
+  Buffer(const Buffer& buffer) = delete;
 
-    glDeleteBuffers(1, &buffer);
-    this->buffer = 0;
+  Buffer(Buffer&& other) : buffer(other.buffer), size(other.size) {
+    other.buffer = 0;
+  }
+
+  ~Buffer() { release(); }
+
+  Buffer& operator=(const Buffer& buffer) = delete;
+
+  Buffer& operator=(Buffer&& other) {
+    if (this != &other) {
+      release();
+
+      buffer = other.buffer;
+      size = other.size;
+
+      other.buffer = 0;
+    }
+
+    return *this;
+  }
+
+  void release() {
+    if (buffer) {
+      spdlog::info("[Buffer] release buffer {:x}", buffer);
+
+      glDeleteBuffers(1, &buffer);
+      this->buffer = 0;
+    }
   }
 
   GLuint getName() const { return buffer; }

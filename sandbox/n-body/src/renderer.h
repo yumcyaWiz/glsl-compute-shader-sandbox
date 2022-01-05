@@ -69,18 +69,6 @@ class Renderer {
     placeParticlesCircular();
   }
 
-  void destroy() {
-    particles.destroy();
-
-    particlesIn.destroy();
-    particlesOut.destroy();
-
-    initParticles.destroy();
-    updateParticles.destroy();
-    swapParticles.destroy();
-    renderParticles.destroy();
-  }
-
   glm::uvec2 getResolution() const { return this->resolution; }
 
   uint32_t getNumberOfParticles() const { return this->nParticles; }
@@ -126,7 +114,7 @@ class Renderer {
       const float G = 6.67430e-11;
       const glm::vec3 velocity =
           std::sqrt((G * black_hole_mass) / r) *
-          glm::vec3(-std::sin(theta), std::cos(theta), 0);
+          (glm::vec3(-std::sin(theta), std::cos(theta), 0));
 
       data[idx].position = glm::vec4(position, 0);
       data[idx].velocity = glm::vec4(velocity, 0);

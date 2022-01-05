@@ -49,19 +49,52 @@ class Quad {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    spdlog::info("[Quad] VAO {:x} created", VAO);
-    spdlog::info("[Quad] VBO {:x} created", VBO);
-    spdlog::info("[Quad] EBO {:x} created", EBO);
+    spdlog::info("[Quad] create VAO {:x}", VAO);
+    spdlog::info("[Quad] create VBO {:x}", VBO);
+    spdlog::info("[Quad] create EBO {:x}", EBO);
   }
 
-  void destroy() {
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
-    glDeleteVertexArrays(1, &VAO);
+  Quad(const Quad& other) = delete;
 
-    spdlog::info("[Quad] VAO {:x} deleted", VAO);
-    spdlog::info("[Quad] VBO {:x} deleted", VBO);
-    spdlog::info("[Quad] EBO {:x} deleted", EBO);
+  Quad(Quad&& other) : VBO(other.VBO), EBO(other.EBO), VAO(other.VAO) {
+    other.VBO = 0;
+    other.EBO = 0;
+    other.VAO = 0;
+  }
+
+  ~Quad() { release(); }
+
+  Quad& operator=(const Quad& other) = delete;
+
+  Quad& operator=(Quad&& other) {
+    if (this != &other) {
+      release();
+
+      VBO = other.VBO;
+      EBO = other.EBO;
+      VAO = other.VAO;
+
+      other.VBO = 0;
+      other.EBO = 0;
+      other.VAO = 0;
+    }
+
+    return *this;
+  }
+
+  void release() {
+    if (VBO) {
+      spdlog::info("[Quad] release VBO {:x}", VBO);
+      glDeleteBuffers(1, &VBO);
+    }
+    if (EBO) {
+      spdlog::info("[Quad] release EBO {:x}", EBO);
+      glDeleteBuffers(1, &EBO);
+    }
+    if (VAO) {
+      spdlog::info("[Quad] release VAO {:x}", VAO);
+      glDeleteVertexArrays(1, &VAO);
+    }
   }
 
   void draw(const Shader& shader) const {

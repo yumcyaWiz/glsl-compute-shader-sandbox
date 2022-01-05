@@ -77,6 +77,41 @@ class Shader {
  public:
   Shader() : vertexShader{0}, fragmentShader{0}, computeShader{0}, program{0} {}
 
+  virtual ~Shader() { release(); }
+
+  Shader(const Shader& other) = delete;
+
+  Shader(Shader&& other)
+      : vertexShader{other.vertexShader},
+        fragmentShader{other.fragmentShader},
+        computeShader{other.computeShader},
+        program{other.program} {
+    other.vertexShader = 0;
+    other.fragmentShader = 0;
+    other.computeShader = 0;
+    other.program = 0;
+  }
+
+  Shader& operator=(const Shader& other) = delete;
+
+  Shader& operator=(Shader&& other) {
+    if (this != &other) {
+      release();
+
+      vertexShader = other.vertexShader;
+      fragmentShader = other.fragmentShader;
+      computeShader = other.computeShader;
+      program = other.program;
+
+      other.vertexShader = 0;
+      other.fragmentShader = 0;
+      other.computeShader = 0;
+      other.program = 0;
+    }
+
+    return *this;
+  }
+
   void setVertexShader(const std::filesystem::path& vertexShaderFilepath) {
     // delete previous shader
     if (this->vertexShader) {
@@ -185,19 +220,24 @@ class Shader {
     spdlog::info("[Shader] program {:x} created", this->program);
   }
 
-  // destroy shaders, program
-  void destroy() {
+  void release() {
     if (this->vertexShader) {
+      spdlog::info("[Shader] release shader {:x}", this->vertexShader);
       this->destroyVertexShader();
     }
+
     if (this->fragmentShader) {
+      spdlog::info("[Shader] release shader {:x}", this->fragmentShader);
       this->destroyFragmentShader();
     }
+
     if (this->computeShader) {
+      spdlog::info("[Shader] release shader {:x}", this->computeShader);
       this->destroyComputeShader();
     }
 
     if (this->program) {
+      spdlog::info("[Shader] release program {:x}", this->program);
       this->destroyProgram();
     }
   }
@@ -250,7 +290,7 @@ class Shader {
 
 class ComputeShader : public Shader {
  public:
-  ComputeShader() {}
+  ComputeShader() : Shader() {}
 
   void run(GLuint work_groups_x, GLuint work_groups_y,
            GLuint work_groups_z) const {

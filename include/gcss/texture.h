@@ -36,6 +36,37 @@ class Texture {
     spdlog::info("[Texture] texture {:x} created", this->texture);
   }
 
+  Texture(const Texture& other) = delete;
+
+  Texture(Texture&& other)
+      : resolution(other.resolution),
+        texture(other.texture),
+        internalFormat(other.internalFormat),
+        format(other.format),
+        type(other.type) {
+    other.texture = 0;
+  }
+
+  ~Texture() { release(); }
+
+  Texture& operator=(const Texture& other) = delete;
+
+  Texture& operator=(Texture&& other) {
+    if (this != &other) {
+      release();
+
+      resolution = std::move(other.resolution);
+      texture = other.texture;
+      internalFormat = other.internalFormat;
+      format = other.format;
+      type = other.type;
+
+      other.texture = 0;
+    }
+
+    return *this;
+  }
+
   glm::uvec2 getResolution() const { return this->resolution; }
 
   GLuint getTextureName() const { return this->texture; }
@@ -76,10 +107,9 @@ class Texture {
                        this->internalFormat);
   }
 
-  // destroy texture object
-  void destroy() {
+  void release() {
     if (texture) {
-      spdlog::info("[Texture] texture {:x} deleted", this->texture);
+      spdlog::info("[Texture] release texture {:x}", this->texture);
 
       glDeleteTextures(1, &this->texture);
       this->texture = 0;

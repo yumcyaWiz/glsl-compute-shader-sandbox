@@ -21,9 +21,9 @@ class Renderer {
 
   Texture cellsIn;
   Texture cellsOut;
+  ComputeShader updateCells;
 
   Quad quad;
-  ComputeShader updateCells;
   Shader renderShader;
 
   double elapsed_time;
@@ -65,14 +65,6 @@ class Renderer {
       input_cell_image[i] = dist(mt) > 0.5 ? 1 : 0;
     }
     cellsIn.setImage(input_cell_image);
-  }
-
-  void destroy() {
-    cellsIn.destroy();
-    cellsOut.destroy();
-    quad.destroy();
-    updateCells.destroy();
-    renderShader.destroy();
   }
 
   glm::uvec2 getResolution() const { return this->resolution; }

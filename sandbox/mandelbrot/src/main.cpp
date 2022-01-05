@@ -1,6 +1,5 @@
 #include <cstdio>
 #include <iostream>
-#include <memory>
 
 #include "glad/gl.h"
 //
@@ -12,7 +11,7 @@
 //
 #include "renderer.h"
 
-std::unique_ptr<Renderer> RENDERER;
+Renderer* RENDERER;
 int MAX_ITERATIONS = 100;
 float SCALE = 1.0f;
 
@@ -85,7 +84,7 @@ int main() {
   ImGui_ImplOpenGL3_Init("#version 460 core");
 
   // init renderer
-  RENDERER = std::make_unique<Renderer>();
+  RENDERER = new Renderer();
 
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
@@ -129,7 +128,7 @@ int main() {
   }
 
   // cleanup
-  RENDERER->destroy();
+  delete RENDERER;
 
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();

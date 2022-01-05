@@ -1,6 +1,5 @@
 #include <cstdio>
 #include <iostream>
-#include <memory>
 
 #include "glad/gl.h"
 //
@@ -12,7 +11,7 @@
 //
 #include "renderer.h"
 
-std::unique_ptr<Renderer> RENDERER;
+Renderer* RENDERER;
 int FPS = 24;
 
 static void glfwErrorCallback(int error, const char* description) {
@@ -82,7 +81,7 @@ int main() {
   ImGui_ImplOpenGL3_Init("#version 460 core");
 
   // init renderer
-  RENDERER = std::make_unique<Renderer>();
+  RENDERER = new Renderer();
 
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
@@ -130,7 +129,7 @@ int main() {
   }
 
   // cleanup
-  RENDERER->destroy();
+  delete RENDERER;
 
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();
