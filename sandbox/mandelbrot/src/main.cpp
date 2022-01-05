@@ -19,7 +19,8 @@ static void glfwErrorCallback(int error, const char* description) {
   fprintf(stderr, "Glfw Error %d: %s\n", error, description);
 }
 
-static void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
+static void framebufferSizeCallback([[maybe_unused]] GLFWwindow* window,
+                                    int width, int height) {
   RENDERER->setResolution(glm::uvec2(width, height));
 }
 

@@ -18,6 +18,7 @@ class Renderer {
   glm::vec2 offset;
   float scale;
   uint32_t fps;
+  double elapsed_time;
 
   Texture cellsIn;
   Texture cellsOut;
@@ -26,13 +27,12 @@ class Renderer {
   Quad quad;
   Shader renderShader;
 
-  double elapsed_time;
-
  public:
   Renderer()
       : resolution{512, 512},
         offset{256, 256},
         scale{1},
+        fps{24},
         elapsed_time{0},
         cellsIn{glm::uvec2(512, 512), GL_R8UI, GL_RED_INTEGER,
                 GL_UNSIGNED_BYTE},
@@ -61,7 +61,7 @@ class Renderer {
     std::uniform_real_distribution<float> dist(0, 1);
     std::vector<uint8_t> input_cell_image(this->resolution.x *
                                           this->resolution.y);
-    for (int i = 0; i < input_cell_image.size(); ++i) {
+    for (std::size_t i = 0; i < input_cell_image.size(); ++i) {
       input_cell_image[i] = dist(mt) > 0.5 ? 1 : 0;
     }
     cellsIn.setImage(input_cell_image);

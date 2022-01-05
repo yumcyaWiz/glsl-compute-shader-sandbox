@@ -47,7 +47,8 @@ class VertexArrayObject {
                                  GLsizei stride, GLsizei offset) const {
     activate();
     glEnableVertexAttribArray(index);
-    glVertexAttribPointer(index, size, type, GL_FALSE, stride, (GLvoid*)offset);
+    glVertexAttribPointer(index, size, type, GL_FALSE, stride,
+                          reinterpret_cast<GLvoid*>(offset));
     deactivate();
   }
 

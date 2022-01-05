@@ -10,6 +10,7 @@
 #include "gcss/camera.h"
 #include "gcss/quad.h"
 #include "gcss/shader.h"
+#include "gcss/vertex-array-object.h"
 //
 #include "particles.h"
 
