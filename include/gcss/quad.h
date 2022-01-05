@@ -39,12 +39,12 @@ class Quad {
                                   3 * sizeof(GLfloat));
   }
 
-  void draw(const Shader& shader) const {
-    shader.activate();
+  void draw(const Program& program) const {
+    program.activate();
     VAO.activate();
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     VAO.deactivate();
-    shader.deactivate();
+    program.deactivate();
   }
 };
 

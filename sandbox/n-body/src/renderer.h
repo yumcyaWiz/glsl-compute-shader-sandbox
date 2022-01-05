@@ -29,22 +29,27 @@ class Renderer {
   Buffer particlesOut;
 
   ComputeShader initParticles;
+  Program initParticlesProgram;
   ComputeShader updateParticles;
-  Shader renderParticles;
+  Program updateParticlesProgram;
+
+  VertexShader vertexShader;
+  FragmentShader fragmentShader;
+  Program renderProgram;
 
  public:
   Renderer() : resolution{512, 512}, nParticles{30000}, dt{0.01f} {
     particles.setParticles(&particlesIn);
 
-    initParticles.setComputeShader(
-        std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" / "n-body" /
-        "init-particles.comp");
-    initParticles.linkShader();
+    initParticles.compile(std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
+                          "shaders" / "n-body" / "init-particles.comp");
+    initParticlesProgram.attachShader(initParticles);
+    initParticlesProgram.linkProgram();
 
-    updateParticles.setComputeShader(
-        std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" / "n-body" /
-        "update-particles.comp");
-    updateParticles.linkShader();
+    updateParticles.compile(std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
+                            "shaders" / "n-body" / "update-particles.comp");
+    updateParticlesProgram.attachShader(updateParticles);
+    updateParticlesProgram.linkProgram();
 
     // NOTE: to use gl_PointSize
     glEnable(GL_PROGRAM_POINT_SIZE);
@@ -52,13 +57,13 @@ class Renderer {
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE);
 
-    renderParticles.setVertexShader(
-        std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
-        "render-particles.vert");
-    renderParticles.setFragmentShader(
-        std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
-        "render-particles.frag");
-    renderParticles.linkShader();
+    vertexShader.compile(std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
+                         "shaders" / "render-particles.vert");
+    fragmentShader.compile(std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
+                           "shaders" / "render-particles.frag");
+    renderProgram.attachShader(vertexShader);
+    renderProgram.attachShader(fragmentShader);
+    renderProgram.linkProgram();
 
     // generate particles
     placeParticlesCircular();
@@ -128,8 +133,13 @@ class Renderer {
   void initVelocity() {
     particlesIn.bindToShaderStorageBuffer(0);
     particlesOut.bindToShaderStorageBuffer(1);
-    initParticles.setUniform("dt", dt);
-    initParticles.run(std::ceil(nParticles / 128.0f), 1, 1);
+    initParticlesProgram.setUniform("dt", dt);
+
+    initParticlesProgram.activate();
+    glDispatchCompute(std::ceil(nParticles / 128.0f), 1, 1);
+    initParticlesProgram.deactivate();
+
+    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
     // swap in/out particles
     std::swap(particlesIn, particlesOut);
@@ -145,18 +155,23 @@ class Renderer {
 
   void render() {
     // render particles
-    renderParticles.setUniform(
+    renderProgram.setUniform(
         "viewProjection",
         camera.computeViewProjectionmatrix(resolution.x, resolution.y));
     glClear(GL_COLOR_BUFFER_BIT);
     glViewport(0, 0, resolution.x, resolution.y);
-    particles.draw(renderParticles);
+    particles.draw(renderProgram);
 
     // update particles
     particlesIn.bindToShaderStorageBuffer(0);
     particlesOut.bindToShaderStorageBuffer(1);
-    updateParticles.setUniform("dt", dt);
-    updateParticles.run(std::ceil(nParticles / 128.0f), 1, 1);
+    updateParticlesProgram.setUniform("dt", dt);
+
+    updateParticlesProgram.activate();
+    glDispatchCompute(std::ceil(nParticles / 128.0f), 1, 1);
+    updateParticlesProgram.deactivate();
+
+    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
     // swap in/out particles
     std::swap(particlesIn, particlesOut);

@@ -23,9 +23,12 @@ class Renderer {
   Texture cellsIn;
   Texture cellsOut;
   ComputeShader updateCells;
+  Program updateCellsProgram;
 
   Quad quad;
-  Shader renderShader;
+  VertexShader vertexShader;
+  FragmentShader fragmentShader;
+  Program renderProgram;
 
  public:
   Renderer()
@@ -38,18 +41,18 @@ class Renderer {
                 GL_UNSIGNED_BYTE},
         cellsOut{glm::uvec2(512, 512), GL_R8UI, GL_RED_INTEGER,
                  GL_UNSIGNED_BYTE} {
-    updateCells.setComputeShader(
-        std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
-        "update-cells.comp");
-    updateCells.linkShader();
+    updateCells.compile(std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
+                        "shaders" / "update-cells.comp");
+    updateCellsProgram.attachShader(updateCells);
+    updateCellsProgram.linkProgram();
 
-    renderShader.setVertexShader(
-        std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
-        "render.vert");
-    renderShader.setFragmentShader(
-        std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
-        "render.frag");
-    renderShader.linkShader();
+    vertexShader.compile(std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
+                         "shaders" / "render.vert");
+    fragmentShader.compile(std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
+                           "shaders" / "render.frag");
+    renderProgram.attachShader(vertexShader);
+    renderProgram.attachShader(fragmentShader);
+    renderProgram.linkProgram();
 
     randomizeCells();
   }
@@ -94,9 +97,9 @@ class Renderer {
     glClear(GL_COLOR_BUFFER_BIT);
     glViewport(0, 0, resolution.x, resolution.y);
     cellsIn.bindToImageUnit(0, GL_READ_ONLY);
-    renderShader.setUniform("offset", offset);
-    renderShader.setUniform("scale", scale);
-    quad.draw(renderShader);
+    renderProgram.setUniform("offset", offset);
+    renderProgram.setUniform("scale", scale);
+    quad.draw(renderProgram);
 
     // limit framerate
     elapsed_time += delta_time;
@@ -106,8 +109,10 @@ class Renderer {
       // update input cells
       cellsIn.bindToImageUnit(0, GL_READ_ONLY);
       cellsOut.bindToImageUnit(1, GL_WRITE_ONLY);
-      updateCells.run(std::ceil(resolution.x / 8.0f),
-                      std::ceil(resolution.y / 8.0f), 1);
+      updateCellsProgram.activate();
+      glDispatchCompute(std::ceil(resolution.x / 8.0f),
+                        std::ceil(resolution.y / 8.0f), 1);
+      updateCellsProgram.deactivate();
 
       // swap input/output texture
       std::swap(cellsIn, cellsOut);

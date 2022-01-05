@@ -56,14 +56,14 @@ class Particles {
     this->VAO = 0;
   }
 
-  void draw(const Shader& shader) const {
-    shader.activate();
+  void draw(const Program& program) const {
+    program.activate();
 
     glBindVertexArray(VAO);
     glDrawArrays(GL_POINTS, 0, particles->getLength());
     glBindVertexArray(0);
 
-    shader.deactivate();
+    program.deactivate();
   }
 };
 

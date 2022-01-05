@@ -14,27 +14,31 @@ class Renderer {
   glm::uvec2 resolution;
 
   Texture texture;
-  ComputeShader helloShader;
+  ComputeShader paintTexture;
+  Program paintTextureProgram;
 
   Quad quad;
-  Shader renderShader;
+  VertexShader vertexShader;
+  FragmentShader fragmentShader;
+  Program renderProgram;
 
  public:
   Renderer()
       : resolution{512, 512},
         texture{resolution, GL_RGBA32F, GL_RGBA, GL_FLOAT} {
-    helloShader.setComputeShader(
-        std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
-        "hello.comp");
-    helloShader.linkShader();
+    paintTexture.compile(std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
+                         "shaders" / "hello.comp");
+    paintTextureProgram.attachShader(paintTexture);
+    paintTextureProgram.linkProgram();
 
-    renderShader.setVertexShader(
-        std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
-        "render.vert");
-    renderShader.setFragmentShader(
-        std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) / "shaders" /
-        "render.frag");
-    renderShader.linkShader();
+    vertexShader.compile(std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
+                         "shaders" / "render.vert");
+    fragmentShader.compile(std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
+                           "shaders" / "render.frag");
+
+    renderProgram.attachShader(vertexShader);
+    renderProgram.attachShader(fragmentShader);
+    renderProgram.linkProgram();
   }
 
   void setResolution(const glm::uvec2& resolution) {
@@ -47,13 +51,17 @@ class Renderer {
   void render() const {
     // run compute shader
     texture.bindToImageUnit(0, GL_WRITE_ONLY);
-    helloShader.run(resolution.x, resolution.y, 1);
+    paintTextureProgram.activate();
+    glDispatchCompute(resolution.x, resolution.y, 1);
+    paintTextureProgram.deactivate();
+
+    glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
     // render quad
     glClear(GL_COLOR_BUFFER_BIT);
     glViewport(0, 0, resolution.x, resolution.y);
     texture.bindToTextureUnit(0);
-    quad.draw(renderShader);
+    quad.draw(renderProgram);
   }
 };
 
