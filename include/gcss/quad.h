@@ -1,7 +1,10 @@
 #ifndef _CSS_QUAD_H
 #define _CSS_QUAD_H
+#include <vector>
 
 #include "glad/gl.h"
+//
+#include "buffer.h"
 #include "shader.h"
 
 namespace gcss {
@@ -9,8 +12,8 @@ namespace gcss {
 class Quad {
  private:
   GLuint VAO;
-  GLuint VBO;
-  GLuint EBO;
+  Buffer VBO;
+  Buffer EBO;
 
  public:
   Quad() {
@@ -20,19 +23,16 @@ class Quad {
 
     // setup VBO
     // position and texcoords
-    constexpr GLfloat vertices[] = {-1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, -1.0f,
-                                    0.0f,  1.0f,  0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-                                    1.0f,  -1.0f, 1.0f, 0.0f, 0.0f, 1.0f};
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    const std::vector<GLfloat> vertices = {
+        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,  -1.0f, 0.0f, 1.0f, 0.0f,
+        1.0f,  1.0f,  0.0f, 1.0f, 1.0f, -1.0f, 1.0f,  0.0f, 0.0f, 1.0f};
+    VBO.setData(vertices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO.getName());
 
     // setup EBO
-    constexpr GLuint indices[] = {0, 1, 2, 2, 3, 0};
-    glGenBuffers(1, &EBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices,
-                 GL_STATIC_DRAW);
+    const std::vector<GLuint> indices = {0, 1, 2, 2, 3, 0};
+    EBO.setData(indices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO.getName());
 
     // position
     glEnableVertexAttribArray(0);
@@ -50,17 +50,11 @@ class Quad {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     spdlog::info("[Quad] create VAO {:x}", VAO);
-    spdlog::info("[Quad] create VBO {:x}", VBO);
-    spdlog::info("[Quad] create EBO {:x}", EBO);
   }
 
   Quad(const Quad& other) = delete;
 
-  Quad(Quad&& other) : VBO(other.VBO), EBO(other.EBO), VAO(other.VAO) {
-    other.VBO = 0;
-    other.EBO = 0;
-    other.VAO = 0;
-  }
+  Quad(Quad&& other) : VAO(other.VAO) { other.VAO = 0; }
 
   ~Quad() { release(); }
 
@@ -70,12 +64,8 @@ class Quad {
     if (this != &other) {
       release();
 
-      VBO = other.VBO;
-      EBO = other.EBO;
       VAO = other.VAO;
 
-      other.VBO = 0;
-      other.EBO = 0;
       other.VAO = 0;
     }
 
@@ -83,14 +73,6 @@ class Quad {
   }
 
   void release() {
-    if (VBO) {
-      spdlog::info("[Quad] release VBO {:x}", VBO);
-      glDeleteBuffers(1, &VBO);
-    }
-    if (EBO) {
-      spdlog::info("[Quad] release EBO {:x}", EBO);
-      glDeleteBuffers(1, &EBO);
-    }
     if (VAO) {
       spdlog::info("[Quad] release VAO {:x}", VAO);
       glDeleteVertexArrays(1, &VAO);
