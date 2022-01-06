@@ -23,15 +23,16 @@ class Texture {
         format(format),
         type(type) {
     // init texture
-    glGenTextures(1, &this->texture);
-    glBindTexture(GL_TEXTURE_2D, this->texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, this->internalFormat, this->resolution.x,
-                 this->resolution.y, 0, this->format, this->type, nullptr);
+    glCreateTextures(GL_TEXTURE_2D, 1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, resolution.x, resolution.y,
+                 0, format, type, nullptr);
     glBindTexture(GL_TEXTURE_2D, 0);
+
+    glTextureParameteri(texture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTextureParameteri(texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
     spdlog::info("[Texture] texture {:x} created", this->texture);
   }
@@ -79,14 +80,18 @@ class Texture {
 
   void setResolution(const glm::uvec2& resolution) {
     this->resolution = resolution;
-    glTextureSubImage2D(texture, 0, 0, 0, resolution.x, resolution.y, format,
-                        type, nullptr);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, resolution.x, resolution.y,
+                 0, format, type, nullptr);
+    glBindTexture(GL_TEXTURE_2D, 0);
   }
 
   template <typename T>
   void setImage(const std::vector<T>& image) const {
-    glTextureSubImage2D(texture, 0, 0, 0, resolution.x, resolution.y, format,
-                        type, image.data());
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, resolution.x, resolution.y,
+                 0, format, type, image.data());
+    glBindTexture(GL_TEXTURE_2D, 0);
   }
 
   // bind texture to the specified texture unit
