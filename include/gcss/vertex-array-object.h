@@ -37,19 +37,20 @@ class VertexArrayObject {
     return *this;
   }
 
-  void bindBuffer(GLenum target, const Buffer& buffer) const {
-    activate();
-    glBindBuffer(target, buffer.getName());
-    deactivate();
+  void bindVertexBuffer(const Buffer& buffer, GLuint binding, GLintptr offset,
+                        GLsizei stride) const {
+    glVertexArrayVertexBuffer(array, binding, buffer.getName(), offset, stride);
   }
 
-  void activateVertexAttribution(GLuint index, GLint size, GLenum type,
-                                 GLsizei stride, GLsizei offset) const {
-    activate();
-    glEnableVertexAttribArray(index);
-    glVertexAttribPointer(index, size, type, GL_FALSE, stride,
-                          reinterpret_cast<GLvoid*>(offset));
-    deactivate();
+  void bindElementBuffer(const Buffer& buffer) const {
+    glVertexArrayElementBuffer(array, buffer.getName());
+  }
+
+  void activateVertexAttribution(GLuint binding, GLuint attrib, GLint size,
+                                 GLenum type, GLsizei offset) const {
+    glEnableVertexArrayAttrib(array, attrib);
+    glVertexArrayAttribBinding(array, attrib, binding);
+    glVertexArrayAttribFormat(array, attrib, size, type, GL_FALSE, offset);
   }
 
   void activate() const { glBindVertexArray(array); }

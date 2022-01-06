@@ -24,19 +24,20 @@ class Quad {
         -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,  -1.0f, 0.0f, 1.0f, 0.0f,
         1.0f,  1.0f,  0.0f, 1.0f, 1.0f, -1.0f, 1.0f,  0.0f, 0.0f, 1.0f};
     VBO.setData(vertices, GL_STATIC_DRAW);
-    VAO.bindBuffer(GL_ARRAY_BUFFER, VBO);
 
     // setup EBO
     const std::vector<GLuint> indices = {0, 1, 2, 2, 3, 0};
     EBO.setData(indices, GL_STATIC_DRAW);
-    VAO.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+
+    // setup VAO
+    VAO.bindVertexBuffer(VBO, 0, 0, 5 * sizeof(GLfloat));
+    VAO.bindElementBuffer(EBO);
 
     // position
-    VAO.activateVertexAttribution(0, 3, GL_FLOAT, 5 * sizeof(GLfloat), 0);
+    VAO.activateVertexAttribution(0, 0, 3, GL_FLOAT, 0);
 
     // texcoords
-    VAO.activateVertexAttribution(1, 2, GL_FLOAT, 5 * sizeof(GLfloat),
-                                  3 * sizeof(GLfloat));
+    VAO.activateVertexAttribution(0, 1, 2, GL_FLOAT, 3 * sizeof(GLfloat));
   }
 
   void draw(const Program& program) const {
