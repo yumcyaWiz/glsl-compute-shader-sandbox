@@ -102,7 +102,6 @@ class Texture {
 
   // bind texture to the specified image unit
   void bindToImageUnit(GLuint image_unit_number, GLenum access) const {
-    glActiveTexture(GL_TEXTURE0 + image_unit_number);
     glBindImageTexture(image_unit_number, this->texture, 0, GL_FALSE, 0, access,
                        this->internalFormat);
   }
