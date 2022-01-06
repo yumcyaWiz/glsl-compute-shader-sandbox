@@ -4,6 +4,12 @@ layout (location = 1) in vec3 velocity;
 layout (location = 2) in vec3 force;
 layout (location = 3) in float mass;
 
+out gl_PerVertex {
+  vec4 gl_Position;
+  float gl_PointSize;
+  float gl_ClipDistance[];
+};
+
 out vec3 base_color;
 
 uniform mat4 viewProjection;

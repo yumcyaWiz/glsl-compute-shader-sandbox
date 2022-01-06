@@ -40,12 +40,12 @@ class Quad {
     VAO.activateVertexAttribution(0, 1, 2, GL_FLOAT, 3 * sizeof(GLfloat));
   }
 
-  void draw(const Program& program) const {
-    program.activate();
+  void draw(const Pipeline& pipeline) const {
+    pipeline.activate();
     VAO.activate();
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     VAO.deactivate();
-    program.deactivate();
+    pipeline.deactivate();
   }
 };
 

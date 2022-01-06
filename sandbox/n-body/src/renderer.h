@@ -29,27 +29,32 @@ class Renderer {
   Buffer particlesOut;
 
   ComputeShader initParticles;
-  Program initParticlesProgram;
+  Pipeline initParticlesPipeline;
+
   ComputeShader updateParticles;
-  Program updateParticlesProgram;
+  Pipeline updateParticlesPipeline;
 
   VertexShader vertexShader;
   FragmentShader fragmentShader;
-  Program renderProgram;
+  Pipeline renderPipeline;
 
  public:
-  Renderer() : resolution{512, 512}, nParticles{30000}, dt{0.01f} {
+  Renderer()
+      : resolution{512, 512},
+        nParticles{30000},
+        dt{0.01f},
+        initParticles{std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
+                      "shaders" / "n-body" / "init-particles.comp"},
+        updateParticles{std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
+                        "shaders" / "n-body" / "update-particles.comp"},
+        vertexShader{std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
+                     "shaders" / "render-particles.vert"},
+        fragmentShader{std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
+                       "shaders" / "render-particles.frag"} {
     particles.setParticles(&particlesIn);
 
-    initParticles.compile(std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
-                          "shaders" / "n-body" / "init-particles.comp");
-    initParticlesProgram.attachShader(initParticles);
-    initParticlesProgram.linkProgram();
-
-    updateParticles.compile(std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
-                            "shaders" / "n-body" / "update-particles.comp");
-    updateParticlesProgram.attachShader(updateParticles);
-    updateParticlesProgram.linkProgram();
+    initParticlesPipeline.attachComputeShader(initParticles);
+    updateParticlesPipeline.attachComputeShader(updateParticles);
 
     // NOTE: to use gl_PointSize
     glEnable(GL_PROGRAM_POINT_SIZE);
@@ -57,13 +62,8 @@ class Renderer {
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE);
 
-    vertexShader.compile(std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
-                         "shaders" / "render-particles.vert");
-    fragmentShader.compile(std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
-                           "shaders" / "render-particles.frag");
-    renderProgram.attachShader(vertexShader);
-    renderProgram.attachShader(fragmentShader);
-    renderProgram.linkProgram();
+    renderPipeline.attachVertexShader(vertexShader);
+    renderPipeline.attachFragmentShader(fragmentShader);
 
     // generate particles
     placeParticlesCircular();
@@ -133,11 +133,11 @@ class Renderer {
   void initVelocity() {
     particlesIn.bindToShaderStorageBuffer(0);
     particlesOut.bindToShaderStorageBuffer(1);
-    initParticlesProgram.setUniform("dt", dt);
+    initParticles.setUniform("dt", dt);
 
-    initParticlesProgram.activate();
+    initParticlesPipeline.activate();
     glDispatchCompute(std::ceil(nParticles / 128.0f), 1, 1);
-    initParticlesProgram.deactivate();
+    initParticlesPipeline.deactivate();
 
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
@@ -155,21 +155,21 @@ class Renderer {
 
   void render() {
     // render particles
-    renderProgram.setUniform(
+    vertexShader.setUniform(
         "viewProjection",
         camera.computeViewProjectionmatrix(resolution.x, resolution.y));
     glClear(GL_COLOR_BUFFER_BIT);
     glViewport(0, 0, resolution.x, resolution.y);
-    particles.draw(renderProgram);
+    particles.draw(renderPipeline);
 
     // update particles
     particlesIn.bindToShaderStorageBuffer(0);
     particlesOut.bindToShaderStorageBuffer(1);
-    updateParticlesProgram.setUniform("dt", dt);
+    updateParticles.setUniform("dt", dt);
 
-    updateParticlesProgram.activate();
+    updateParticlesPipeline.activate();
     glDispatchCompute(std::ceil(nParticles / 128.0f), 1, 1);
-    updateParticlesProgram.deactivate();
+    updateParticlesPipeline.deactivate();
 
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 

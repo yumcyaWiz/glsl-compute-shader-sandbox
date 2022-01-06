@@ -17,8 +17,7 @@ namespace gcss {
 
 class Shader {
  private:
-  GLuint shader;
-  GLenum type;
+  GLuint program;
 
   static std::string loadStringFromFile(const std::filesystem::path& filepath) {
     std::ifstream file(filepath);
@@ -31,22 +30,24 @@ class Shader {
   }
 
  public:
-  Shader(GLenum type) {
-    shader = glCreateShader(type);
+  Shader(GLenum type, const std::filesystem::path& filepath) {
+    const std::string shader_source = loadStringFromFile(filepath);
+    const char* shader_source_c = shader_source.c_str();
+    program = glCreateShaderProgramv(type, 1, &shader_source_c);
+    spdlog::info("[Shader] program {:x} created", program);
 
-    switch (type) {
-      case GL_VERTEX_SHADER:
-        spdlog::info("[Shader] vertex shader {:x} created", shader);
-        break;
-      case GL_GEOMETRY_SHADER:
-        spdlog::info("[Shader] geometry shader {:x} created", shader);
-        break;
-      case GL_FRAGMENT_SHADER:
-        spdlog::info("[Shader] fragment shader {:x} created", shader);
-        break;
-      case GL_COMPUTE_SHADER:
-        spdlog::info("[Shader] compute shader {:x} created", shader);
-        break;
+    // check compile and link error
+    int success = 0;
+    glGetProgramiv(program, GL_LINK_STATUS, &success);
+    if (success == GL_FALSE) {
+      spdlog::error("[Shader] failed to link program {:x}", program);
+
+      GLint logSize = 0;
+      glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logSize);
+      std::vector<GLchar> errorLog(logSize);
+      glGetProgramInfoLog(program, logSize, &logSize, &errorLog[0]);
+      std::string errorLogStr(errorLog.begin(), errorLog.end());
+      spdlog::error("[Shader] {}", errorLogStr);
     }
   }
 
@@ -54,97 +55,11 @@ class Shader {
 
   Shader(const Shader& other) = delete;
 
-  Shader(Shader&& other) : shader(other.shader), type(other.type) {
-    other.shader = 0;
-  }
+  Shader(Shader&& other) : program(other.program) { other.program = 0; }
 
   Shader& operator=(const Shader& other) = delete;
 
   Shader& operator=(Shader&& other) {
-    if (this != &other) {
-      release();
-
-      shader = other.shader;
-      type = other.type;
-
-      other.shader = 0;
-    }
-
-    return *this;
-  }
-
-  void release() {
-    if (this->shader) {
-      spdlog::info("[Shader] release shader {:x}", this->shader);
-      glDeleteShader(shader);
-    }
-  }
-
-  GLuint getName() const { return shader; }
-
-  void compile(const std::filesystem::path& filepath) {
-    spdlog::info("[Shader] loading shader from {}", filepath.generic_string());
-
-    const std::string shader_source = loadStringFromFile(filepath);
-    const char* shader_source_c = shader_source.c_str();
-    glShaderSource(shader, 1, &shader_source_c, nullptr);
-
-    glCompileShader(shader);
-
-    // show compile error
-    int success = 0;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-    if (success == GL_FALSE) {
-      spdlog::error("[Shader] failed to compile shader {:x}", shader);
-
-      GLint logSize = 0;
-      glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logSize);
-      std::vector<GLchar> errorLog(logSize);
-      glGetShaderInfoLog(shader, logSize, &logSize, errorLog.data());
-      std::string errorLogStr(errorLog.begin(), errorLog.end());
-      spdlog::error("[Shader] {}", errorLogStr);
-    }
-  }
-};
-
-class VertexShader : public Shader {
- public:
-  VertexShader() : Shader(GL_VERTEX_SHADER) {}
-};
-
-class GeometryShader : public Shader {
- public:
-  GeometryShader() : Shader(GL_GEOMETRY_SHADER) {}
-};
-
-class FragmentShader : public Shader {
- public:
-  FragmentShader() : Shader(GL_FRAGMENT_SHADER) {}
-};
-
-class ComputeShader : public Shader {
- public:
-  ComputeShader() : Shader(GL_COMPUTE_SHADER) {}
-};
-
-class Program {
- public:
-  GLuint program;
-
-  Program() {
-    program = glCreateProgram();
-    spdlog::info("[Program] program {:x} created", program);
-  }
-
-  Program(const Program& other) = delete;
-
-  Program(Program&& other) : program(other.program) { other.program = 0; }
-
-  ~Program() { release(); }
-
-  Program& operator=(const Program& other) = delete;
-
-  Program& operator=(Program&& other) {
     if (this != &other) {
       release();
 
@@ -158,40 +73,12 @@ class Program {
 
   void release() {
     if (program) {
-      spdlog::info("[Program] release program {:x}", program);
+      spdlog::info("[Shader] release program {:x}", program);
       glDeleteProgram(program);
     }
   }
 
-  void attachShader(const Shader& shader) const {
-    glAttachShader(program, shader.getName());
-  }
-
-  void detachShader(const Shader& shader) const {
-    glDetachShader(program, shader.getName());
-  }
-
-  void linkProgram() const {
-    glLinkProgram(program);
-
-    // show link error
-    int success = 0;
-    glGetProgramiv(this->program, GL_LINK_STATUS, &success);
-    if (success == GL_FALSE) {
-      spdlog::error("[Program] failed to link shaders");
-
-      GLint logSize = 0;
-      glGetProgramiv(this->program, GL_INFO_LOG_LENGTH, &logSize);
-      std::vector<GLchar> errorLog(logSize);
-      glGetProgramInfoLog(this->program, logSize, &logSize, &errorLog[0]);
-      std::string errorLogStr(errorLog.begin(), errorLog.end());
-      spdlog::error("[Program] {}", errorLogStr);
-    }
-  }
-
-  void activate() const { glUseProgram(program); }
-
-  void deactivate() const { glUseProgram(0); }
+  GLuint getProgram() const { return program; }
 
   void setUniform(const std::string& uniform_name,
                   const std::variant<bool, GLint, GLuint, GLfloat, glm::vec2,
@@ -231,6 +118,83 @@ class Program {
     };
     std::visit(Visitor{program, location}, value);
   }
+};
+
+class VertexShader : public Shader {
+ public:
+  VertexShader(const std::filesystem::path& filepath)
+      : Shader(GL_VERTEX_SHADER, filepath) {}
+};
+
+class GeometryShader : public Shader {
+ public:
+  GeometryShader(const std::filesystem::path& filepath)
+      : Shader(GL_GEOMETRY_SHADER, filepath) {}
+};
+
+class FragmentShader : public Shader {
+ public:
+  FragmentShader(const std::filesystem::path& filepath)
+      : Shader(GL_FRAGMENT_SHADER, filepath) {}
+};
+
+class ComputeShader : public Shader {
+ public:
+  ComputeShader(const std::filesystem::path& filepath)
+      : Shader(GL_COMPUTE_SHADER, filepath) {}
+};
+
+class Pipeline {
+ public:
+  GLuint pipeline;
+
+  Pipeline() {
+    glCreateProgramPipelines(1, &pipeline);
+    spdlog::info("[Pipeline] pipeline {:x} created", pipeline);
+  }
+
+  Pipeline(const Pipeline& other) = delete;
+
+  Pipeline(Pipeline&& other) : pipeline(other.pipeline) { other.pipeline = 0; }
+
+  ~Pipeline() { release(); }
+
+  Pipeline& operator=(const Pipeline& other) = delete;
+
+  Pipeline& operator=(Pipeline&& other) {
+    if (this != &other) {
+      release();
+
+      pipeline = other.pipeline;
+
+      other.pipeline = 0;
+    }
+
+    return *this;
+  }
+
+  void release() {
+    if (pipeline) {
+      spdlog::info("[Pipeline] release pipeline {:x}", pipeline);
+      glDeleteProgramPipelines(1, &pipeline);
+    }
+  }
+
+  void attachVertexShader(const VertexShader& shader) const {
+    glUseProgramStages(pipeline, GL_VERTEX_SHADER_BIT, shader.getProgram());
+  }
+
+  void attachFragmentShader(const FragmentShader& shader) const {
+    glUseProgramStages(pipeline, GL_FRAGMENT_SHADER_BIT, shader.getProgram());
+  }
+
+  void attachComputeShader(const ComputeShader& shader) const {
+    glUseProgramStages(pipeline, GL_COMPUTE_SHADER_BIT, shader.getProgram());
+  }
+
+  void activate() const { glBindProgramPipeline(pipeline); }
+
+  void deactivate() const { glBindProgramPipeline(0); }
 };
 
 }  // namespace gcss

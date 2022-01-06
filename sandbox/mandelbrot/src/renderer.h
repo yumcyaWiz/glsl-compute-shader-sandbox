@@ -19,12 +19,12 @@ class Renderer {
 
   Texture texture;
   ComputeShader mandelbrotShader;
-  Program mandelbrotProgram;
+  Pipeline mandelbrotPipeline;
 
   Quad quad;
   VertexShader vertexShader;
   FragmentShader fragmentShader;
-  Program renderProgram;
+  Pipeline renderPipeline;
 
  public:
   Renderer()
@@ -32,19 +32,17 @@ class Renderer {
         center{0, 0},
         scale{1.0f},
         maxIterations{100u},
-        texture{glm::vec2(512, 512), GL_RGBA32F, GL_RGBA, GL_FLOAT} {
-    mandelbrotShader.compile(std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
-                             "shaders" / "mandelbrot.comp");
-    mandelbrotProgram.attachShader(mandelbrotShader);
-    mandelbrotProgram.linkProgram();
+        texture{glm::vec2(512, 512), GL_RGBA32F, GL_RGBA, GL_FLOAT},
+        mandelbrotShader(std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
+                         "shaders" / "mandelbrot.comp"),
+        vertexShader(std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
+                     "shaders" / "render.vert"),
+        fragmentShader(std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
+                       "shaders" / "render.frag") {
+    mandelbrotPipeline.attachComputeShader(mandelbrotShader);
 
-    vertexShader.compile(std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
-                         "shaders" / "render.vert");
-    fragmentShader.compile(std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
-                           "shaders" / "render.frag");
-    renderProgram.attachShader(vertexShader);
-    renderProgram.attachShader(fragmentShader);
-    renderProgram.linkProgram();
+    renderPipeline.attachVertexShader(vertexShader);
+    renderPipeline.attachFragmentShader(fragmentShader);
   }
 
   glm::uvec2 getResolution() const { return this->resolution; }
@@ -71,13 +69,13 @@ class Renderer {
   void render() const {
     // run compute shader
     texture.bindToImageUnit(0, GL_WRITE_ONLY);
-    mandelbrotProgram.setUniform("center", center);
-    mandelbrotProgram.setUniform("scale", scale);
-    mandelbrotProgram.setUniform("max_iterations", maxIterations);
-    mandelbrotProgram.activate();
+    mandelbrotShader.setUniform("center", center);
+    mandelbrotShader.setUniform("scale", scale);
+    mandelbrotShader.setUniform("max_iterations", maxIterations);
+    mandelbrotPipeline.activate();
     glDispatchCompute(std::ceil(resolution.x / 8.0f),
                       std::ceil(resolution.y / 8.0f), 1);
-    mandelbrotProgram.deactivate();
+    mandelbrotPipeline.deactivate();
 
     glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
@@ -85,7 +83,7 @@ class Renderer {
     glClear(GL_COLOR_BUFFER_BIT);
     glViewport(0, 0, resolution.x, resolution.y);
     texture.bindToTextureUnit(0);
-    quad.draw(renderProgram);
+    quad.draw(renderPipeline);
   }
 };
 
