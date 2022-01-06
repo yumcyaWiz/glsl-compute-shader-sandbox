@@ -79,19 +79,14 @@ class Texture {
 
   void setResolution(const glm::uvec2& resolution) {
     this->resolution = resolution;
-
-    glBindTexture(GL_TEXTURE_2D, this->texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, this->internalFormat, this->resolution.x,
-                 this->resolution.y, 0, this->format, this->type, nullptr);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glTextureSubImage2D(texture, 0, 0, 0, resolution.x, resolution.y, format,
+                        type, nullptr);
   }
 
   template <typename T>
   void setImage(const std::vector<T>& image) const {
-    glBindTexture(GL_TEXTURE_2D, this->texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, this->internalFormat, this->resolution.x,
-                 this->resolution.y, 0, this->format, this->type, image.data());
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glTextureSubImage2D(texture, 0, 0, 0, resolution.x, resolution.y, format,
+                        type, image.data());
   }
 
   // bind texture to the specified texture unit
