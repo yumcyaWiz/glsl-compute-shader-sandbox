@@ -2,6 +2,7 @@
 #define _PARTICLES_H
 #include "gcss/buffer.h"
 #include "gcss/shader.h"
+#include "gcss/vertex-array-object.h"
 
 using namespace gcss;
 
@@ -14,55 +15,34 @@ struct alignas(16) Particle {
 
 class Particles {
  private:
-  GLuint VAO;
+  VertexArrayObject VAO;
   const Buffer* particles;
 
  public:
-  Particles() { glCreateVertexArrays(1, &VAO); }
+  Particles() {}
 
   void setParticles(const Buffer* particles) {
     this->particles = particles;
-
-    // setup VAO
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, particles->getName());
+    VAO.bindVertexBuffer(*particles, 0, 0, sizeof(Particle));
 
     // position
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Particle),
-                          (GLvoid*)0);
+    VAO.activateVertexAttribution(0, 0, 3, GL_FLOAT, 0);
 
     // velocity
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Particle),
-                          (GLvoid*)(4 * sizeof(GLfloat)));
+    VAO.activateVertexAttribution(0, 1, 3, GL_FLOAT, 4 * sizeof(GLfloat));
 
     // force
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Particle),
-                          (GLvoid*)(8 * sizeof(GLfloat)));
+    VAO.activateVertexAttribution(0, 2, 3, GL_FLOAT, 8 * sizeof(GLfloat));
 
     // mass
-    glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(Particle),
-                          (GLvoid*)(12 * sizeof(GLfloat)));
-
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-  }
-
-  void destroy() {
-    glDeleteVertexArrays(1, &VAO);
-    this->VAO = 0;
+    VAO.activateVertexAttribution(0, 3, 1, GL_FLOAT, 12 * sizeof(GLfloat));
   }
 
   void draw(const Pipeline& pipeline) const {
     pipeline.activate();
-
-    glBindVertexArray(VAO);
+    VAO.activate();
     glDrawArrays(GL_POINTS, 0, particles->getLength());
-    glBindVertexArray(0);
-
+    VAO.deactivate();
     pipeline.deactivate();
   }
 };
