@@ -31,13 +31,15 @@ void handleInput(GLFWwindow* window, const ImGuiIO& io) {
   }
 
   // move center
-  if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+  if (!io.WantCaptureMouse &&
+      glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
     RENDERER->move(0.1f * io.DeltaTime *
                    glm::vec2(-io.MouseDelta.x, io.MouseDelta.y));
   }
 
   // zoom in/out
-  if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
+  if (!io.WantCaptureMouse &&
+      glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
     RENDERER->zoom(0.1f * io.DeltaTime * io.MouseDelta.y);
   }
 }
@@ -88,6 +90,8 @@ int main() {
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
 
+    handleInput(window, io);
+
     // start imgui frame
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -109,8 +113,6 @@ int main() {
       ImGui::InputInt("Max iterations", &MAX_ITERATIONS);
     }
     ImGui::End();
-
-    handleInput(window, io);
 
     // render
     RENDERER->setMaxIterations(MAX_ITERATIONS);

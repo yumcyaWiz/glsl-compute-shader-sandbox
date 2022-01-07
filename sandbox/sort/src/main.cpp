@@ -9,13 +9,29 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 //
+#include "spdlog/spdlog.h"
+//
 #include "renderer.h"
 
 Renderer* RENDERER;
-int FPS = 24;
 
 static void glfwErrorCallback(int error, const char* description) {
   fprintf(stderr, "Glfw Error %d: %s\n", error, description);
+}
+
+void GLAPIENTRY debugMessageCallback([[maybe_unused]] GLenum source,
+                                     GLenum type, [[maybe_unused]] GLuint id,
+                                     GLenum severity,
+                                     [[maybe_unused]] GLsizei length,
+                                     const GLchar* message,
+                                     [[maybe_unused]] const void* userParam) {
+  if (type == GL_DEBUG_TYPE_ERROR) {
+    spdlog::error("[GL] type = 0x{:x}, severity = 0x{:x}, message = {}", type,
+                  severity, message);
+  } else {
+    spdlog::info("[GL] type = 0x{:x}, severity = 0x{:x}, message = {}", type,
+                 severity, message);
+  }
 }
 
 static void framebufferSizeCallback([[maybe_unused]] GLFWwindow* window,
@@ -29,17 +45,23 @@ void handleInput(GLFWwindow* window, const ImGuiIO& io) {
     glfwSetWindowShouldClose(window, GLFW_TRUE);
   }
 
-  // move
-  if (!io.WantCaptureMouse &&
-      glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
-    RENDERER->move(100.0f * io.DeltaTime *
-                   glm::vec2(-io.MouseDelta.x, io.MouseDelta.y));
+  // move camera
+  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+    RENDERER->move(CameraMovement::FORWARD, io.DeltaTime);
+  }
+  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+    RENDERER->move(CameraMovement::LEFT, io.DeltaTime);
+  }
+  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+    RENDERER->move(CameraMovement::BACKWARD, io.DeltaTime);
+  }
+  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+    RENDERER->move(CameraMovement::RIGHT, io.DeltaTime);
   }
 
-  // zoom in/out
-  if (!io.WantCaptureMouse &&
-      glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
-    RENDERER->zoom(0.1f * io.DeltaTime * io.MouseDelta.y);
+  // camera look around
+  if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+    RENDERER->lookAround(io.MouseDelta.x, io.MouseDelta.y);
   }
 }
 
@@ -54,12 +76,19 @@ int main() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-  GLFWwindow* window =
-      glfwCreateWindow(512, 512, "life-game", nullptr, nullptr);
+
+#ifdef NDEBUG
+  glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_FALSE);
+#else
+  glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+#endif
+
+  GLFWwindow* window = glfwCreateWindow(512, 512, "sort", nullptr, nullptr);
   if (!window) {
     return -1;
   }
   glfwMakeContextCurrent(window);
+  glfwSwapInterval(0);  // disable vsync
 
   glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
@@ -68,6 +97,8 @@ int main() {
     std::cerr << "failed to initialize OpenGL context" << std::endl;
     return -1;
   }
+
+  glDebugMessageCallback(debugMessageCallback, 0);
 
   // init imgui
   IMGUI_CHECKVERSION();
@@ -88,37 +119,19 @@ int main() {
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
 
-    handleInput(window, io);
-
     // start imgui frame
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
     ImGui::Begin("UI");
-    {
-      const glm::uvec2 resolution = RENDERER->getResolution();
-      ImGui::Text("Resolution: (%d, %d)", resolution.x, resolution.y);
-
-      const glm::vec2 offset = RENDERER->getOffset();
-      ImGui::Text("Offset: (%f, %f)", offset.x, offset.y);
-
-      const float scale = RENDERER->getScale();
-      ImGui::Text("Scale: %f", scale);
-
-      ImGui::Separator();
-
-      ImGui::InputInt("FPS", &FPS);
-
-      if (ImGui::Button("Randomize cells")) {
-        RENDERER->randomizeCells();
-      }
-    }
+    {}
     ImGui::End();
 
+    handleInput(window, io);
+
     // render
-    RENDERER->setFPS(FPS);
-    RENDERER->render(io.DeltaTime);
+    RENDERER->render();
 
     // render imgui
     ImGui::Render();

@@ -58,7 +58,8 @@ void handleInput(GLFWwindow* window, const ImGuiIO& io) {
   }
 
   // camera look around
-  if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+  if (!io.WantCaptureMouse &&
+      glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
     RENDERER->lookAround(io.MouseDelta.x, io.MouseDelta.y);
   }
 }
@@ -117,6 +118,8 @@ int main() {
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
 
+    handleInput(window, io);
+
     // start imgui frame
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -145,8 +148,6 @@ int main() {
       }
     }
     ImGui::End();
-
-    handleInput(window, io);
 
     // render
     RENDERER->render();
