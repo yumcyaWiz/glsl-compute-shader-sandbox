@@ -16,6 +16,8 @@ layout(std430, binding = 0) buffer layout_particles {
   Particle particles[];
 };
 
+const float EPS = 1e-3;
+
 void main() {
   uint gidx = gl_GlobalInvocationID.x;
 
@@ -24,7 +26,9 @@ void main() {
   float mass = particles[gidx].mass;
 
   // compute gravitational force
-  vec3 F = mass * gravityIntensity * normalize(gravityCenter - position) - k * velocity;
+  vec3 v = gravityCenter - position;
+  float l = length(v);
+  vec3 F = mass * gravityIntensity * v / (l * l + EPS) - k * velocity;
 
   // leap-frog scehem
   vec3 a = F / mass;

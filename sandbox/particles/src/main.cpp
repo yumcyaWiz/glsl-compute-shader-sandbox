@@ -140,7 +140,7 @@ int main() {
     handleInput(window, io);
 
     // render
-    RENDERER->render();
+    RENDERER->render(io.DeltaTime);
 
     // render imgui
     ImGui::Render();

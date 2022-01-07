@@ -33,19 +33,22 @@ class Renderer {
   FragmentShader fragmentShader;
   Pipeline renderPipeline;
 
+  float elapsed_time;
+
  public:
   Renderer()
       : resolution{512, 512},
         nParticles{1000000},
         gravityCenter{0},
-        gravityIntensity{0.001f},
+        gravityIntensity{0.1f},
         dt{0.01f},
         updateParticles{std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
                         "shaders" / "update-particles.comp"},
         vertexShader{std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
                      "shaders" / "render-particles.vert"},
         fragmentShader{std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
-                       "shaders" / "render-particles.frag"} {
+                       "shaders" / "render-particles.frag"},
+        elapsed_time{0} {
     particles.setParticles(&particlesBuffer);
 
     updateParticlesPipeline.attachComputeShader(updateParticles);
@@ -117,7 +120,7 @@ class Renderer {
     camera.lookAround(d_phi, d_theta);
   }
 
-  void render() {
+  void render(float delta_time) {
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
     // render particles
@@ -129,14 +132,19 @@ class Renderer {
     particles.draw(renderPipeline);
 
     // update particles
-    particlesBuffer.bindToShaderStorageBuffer(0);
-    updateParticles.setUniform("gravityCenter", gravityCenter);
-    updateParticles.setUniform("gravityIntensity", gravityIntensity);
-    updateParticles.setUniform("k", 0.01f);
-    updateParticles.setUniform("dt", dt);
-    updateParticlesPipeline.activate();
-    glDispatchCompute(std::ceil(nParticles / 128.0f), 1, 1);
-    updateParticlesPipeline.deactivate();
+    elapsed_time += delta_time;
+    if (elapsed_time > dt) {
+      elapsed_time = 0;
+
+      particlesBuffer.bindToShaderStorageBuffer(0);
+      updateParticles.setUniform("gravityCenter", gravityCenter);
+      updateParticles.setUniform("gravityIntensity", gravityIntensity);
+      updateParticles.setUniform("k", 0.1f);
+      updateParticles.setUniform("dt", dt);
+      updateParticlesPipeline.activate();
+      glDispatchCompute(std::ceil(nParticles / 128.0f), 1, 1);
+      updateParticlesPipeline.deactivate();
+    }
   }
 };
 
