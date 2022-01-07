@@ -58,6 +58,7 @@ class Renderer {
 
     updateParticlesPipeline.attachComputeShader(updateParticles);
 
+    glEnable(GL_PROGRAM_POINT_SIZE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE);
 

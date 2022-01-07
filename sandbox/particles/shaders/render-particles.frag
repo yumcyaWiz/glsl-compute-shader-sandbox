@@ -5,5 +5,8 @@ out vec4 fragColor;
 uniform vec3 baseColor;
 
 void main() {
-  fragColor = vec4(baseColor, 1.0);
+  vec2 uv = 2.0 * gl_PointCoord - vec2(1);
+  float r = length(uv);
+  vec3 color = baseColor * exp(-10.0 * r);
+  fragColor = vec4(color, 1.0);
 }
