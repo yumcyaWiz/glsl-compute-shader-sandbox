@@ -10,6 +10,7 @@ struct Particle {
 uniform vec3 gravityCenter;
 uniform float gravityIntensity;
 uniform float k;
+uniform bool increaseK;
 uniform float dt;
 
 layout(std430, binding = 0) buffer layout_particles {
@@ -28,6 +29,7 @@ void main() {
   // compute gravitational force
   vec3 v = gravityCenter - position;
   float l = length(v);
+  float k = increaseK ? 10.0 * k : k;
   vec3 F = mass * gravityIntensity * v / (l * l + EPS) - k * velocity;
 
   // leap-frog scehem

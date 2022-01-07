@@ -19,7 +19,10 @@ class Renderer {
   uint32_t nParticles;
   glm::vec3 gravityCenter;
   float gravityIntensity;
+  float k;
   float dt;
+  bool increaseK;
+  glm::vec3 baseColor;
 
   Camera camera;
 
@@ -41,7 +44,9 @@ class Renderer {
         nParticles{1000000},
         gravityCenter{0},
         gravityIntensity{0.1f},
+        k{0.1f},
         dt{0.01f},
+        baseColor{0.2, 0.4, 0.8},
         updateParticles{std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
                         "shaders" / "update-particles.comp"},
         vertexShader{std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
@@ -83,8 +88,16 @@ class Renderer {
     this->gravityIntensity = gravityIntensity;
   }
 
+  float getK() const { return k; }
+  void setK(float k) { this->k = k; }
+
   float getDt() const { return dt; }
   void setDt(float dt) { this->dt = dt; }
+
+  void setIncreaseK(bool increaseK) { this->increaseK = increaseK; }
+
+  glm::vec3 getBaseColor() const { return baseColor; }
+  void setBaseColor(const glm::vec3& baseColor) { this->baseColor = baseColor; }
 
   glm::vec3 screenToWorld(const glm::vec2& screen) const {
     glm::vec3 origin, direction;
@@ -104,7 +117,7 @@ class Renderer {
 
     std::vector<Particle> data(nParticles);
     for (std::size_t i = 0; i < nParticles; ++i) {
-      data[i].position = glm::vec4(dist(mt), dist(mt), 0.5f * dist(mt), 0);
+      data[i].position = 0.5f * glm::vec4(dist(mt), dist(mt), dist(mt), 0);
       data[i].velocity = glm::vec4(0);
       data[i].mass = 1.0f;
     }
@@ -127,6 +140,7 @@ class Renderer {
     vertexShader.setUniform(
         "viewProjection",
         camera.computeViewProjectionmatrix(resolution.x, resolution.y));
+    fragmentShader.setUniform("baseColor", baseColor);
     glClear(GL_COLOR_BUFFER_BIT);
     glViewport(0, 0, resolution.x, resolution.y);
     particles.draw(renderPipeline);
@@ -139,7 +153,8 @@ class Renderer {
       particlesBuffer.bindToShaderStorageBuffer(0);
       updateParticles.setUniform("gravityCenter", gravityCenter);
       updateParticles.setUniform("gravityIntensity", gravityIntensity);
-      updateParticles.setUniform("k", 0.1f);
+      updateParticles.setUniform("increaseK", increaseK);
+      updateParticles.setUniform("k", k);
       updateParticles.setUniform("dt", dt);
       updateParticlesPipeline.activate();
       glDispatchCompute(std::ceil(nParticles / 128.0f), 1, 1);

@@ -60,16 +60,26 @@ void handleInput(GLFWwindow* window, const ImGuiIO& io) {
   }
 
   // camera look around
-  if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS) {
+  if (!io.WantCaptureMouse &&
+      glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS) {
     RENDERER->lookAround(io.MouseDelta.x, io.MouseDelta.y);
   }
 
   // set gravity center
-  if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+  if (!io.WantCaptureMouse &&
+      glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
     const glm::uvec2 resolution = RENDERER->getResolution();
     const glm::vec3 world_pos = RENDERER->screenToWorld(
         glm::vec2(io.MousePos.x, resolution.y - io.MousePos.y));
     RENDERER->setGravityCenter(world_pos);
+  }
+
+  // increase k
+  if (!io.WantCaptureMouse &&
+      glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
+    RENDERER->setIncreaseK(true);
+  } else {
+    RENDERER->setIncreaseK(false);
   }
 }
 
@@ -128,16 +138,50 @@ int main() {
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
 
+    handleInput(window, io);
+
     // start imgui frame
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
     ImGui::Begin("UI");
-    { ImGui::Text("Framerate %.3f", io.Framerate); }
-    ImGui::End();
+    {
+      ImGui::Text("Framerate %.3f", io.Framerate);
 
-    handleInput(window, io);
+      ImGui::Separator();
+
+      static int n_particles = RENDERER->getNParticles();
+      if (ImGui::InputInt("Number of particles", &n_particles)) {
+        n_particles = std::clamp(n_particles, 0, 10000000);
+        RENDERER->setNParticles(n_particles);
+      }
+
+      static float gravity = RENDERER->getGravityIntensity();
+      if (ImGui::InputFloat("Gravity", &gravity)) {
+        RENDERER->setGravityIntensity(gravity);
+      }
+
+      static float k = RENDERER->getK();
+      if (ImGui::InputFloat("k", &k)) {
+        RENDERER->setK(k);
+      }
+
+      static float dt = RENDERER->getDt();
+      if (ImGui::InputFloat("dt", &dt)) {
+        RENDERER->setDt(dt);
+      }
+
+      static glm::vec3 base_color = RENDERER->getBaseColor();
+      if (ImGui::ColorPicker3("baseColor", glm::value_ptr(base_color))) {
+        RENDERER->setBaseColor(base_color);
+      }
+
+      if (ImGui::Button("Reset particles")) {
+        RENDERER->placeParticles();
+      }
+    }
+    ImGui::End();
 
     // render
     RENDERER->render(io.DeltaTime);
