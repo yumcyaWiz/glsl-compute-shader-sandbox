@@ -60,8 +60,16 @@ void handleInput(GLFWwindow* window, const ImGuiIO& io) {
   }
 
   // camera look around
-  if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+  if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS) {
     RENDERER->lookAround(io.MouseDelta.x, io.MouseDelta.y);
+  }
+
+  // set gravity center
+  if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+    const glm::uvec2 resolution = RENDERER->getResolution();
+    const glm::vec3 world_pos = RENDERER->screenToWorld(
+        glm::vec2(io.MousePos.x, resolution.y - io.MousePos.y));
+    RENDERER->setGravityCenter(world_pos);
   }
 }
 
@@ -126,7 +134,7 @@ int main() {
     ImGui::NewFrame();
 
     ImGui::Begin("UI");
-    {}
+    { ImGui::Text("Framerate %.3f", io.Framerate); }
     ImGui::End();
 
     handleInput(window, io);
