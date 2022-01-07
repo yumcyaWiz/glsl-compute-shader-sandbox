@@ -32,6 +32,10 @@ make
 
 ![](img/life-game.jpg)
 
+### particles
+
+![](img/particles.jpg)
+
 ### n-body
 
 ![](img/n-body.png)
