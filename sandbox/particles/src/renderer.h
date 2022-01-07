@@ -72,7 +72,7 @@ class Renderer {
     for (std::size_t i = 0; i < nParticles; ++i) {
       data[i].position = glm::vec4(dist(mt), dist(mt), dist(mt), 0);
       data[i].velocity = glm::vec4(0);
-      data[i].mass = 1;
+      data[i].mass = 1.0f;
     }
 
     particlesBuffer.setData(data, GL_DYNAMIC_DRAW);
@@ -87,6 +87,8 @@ class Renderer {
   }
 
   void render() {
+    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
     // render particles
     vertexShader.setUniform(
         "viewProjection",
@@ -94,6 +96,15 @@ class Renderer {
     glClear(GL_COLOR_BUFFER_BIT);
     glViewport(0, 0, resolution.x, resolution.y);
     particles.draw(renderPipeline);
+
+    // update particles
+    particlesBuffer.bindToShaderStorageBuffer(0);
+    updateParticles.setUniform("gravityCenter", glm::vec3(0));
+    updateParticles.setUniform("gravityIntensity", 0.0001f);
+    updateParticles.setUniform("dt", 0.01f);
+    updateParticlesPipeline.activate();
+    glDispatchCompute(std::ceil(nParticles / 128.0f), 1, 1);
+    updateParticlesPipeline.deactivate();
   }
 };
 
