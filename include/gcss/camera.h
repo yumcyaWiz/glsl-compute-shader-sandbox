@@ -104,6 +104,22 @@ class Camera {
     camRight = glm::normalize(glm::cross(camForward, glm::vec3(0, 1.0f, 0)));
     camUp = glm::normalize(glm::cross(camRight, camForward));
   }
+
+  void getRay(const glm::vec2& window, const glm::uvec2& resolution,
+              glm::vec3& origin, glm::vec3& direction) const {
+    const glm::mat4 view = computeViewMatrix();
+    const glm::mat4 projection =
+        computeProjectionMatrix(resolution.x, resolution.y);
+    const glm::vec4 viewport = glm::vec4(0, 0, resolution.x, resolution.y);
+
+    const glm::vec3 p1 =
+        glm::unProject(glm::vec3(window, 0), view, projection, viewport);
+    const glm::vec3 p2 =
+        glm::unProject(glm::vec3(window, 1), view, projection, viewport);
+
+    origin = p1;
+    direction = glm::normalize(p2 - p1);
+  }
 };
 
 }  // namespace gcss
