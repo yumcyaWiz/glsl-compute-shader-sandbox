@@ -33,8 +33,6 @@ int main() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);  // required for Mac
-  // glfwWindowHint(GLFW_SAMPLES, 4);                      // 4x MSAA
   GLFWwindow* window = glfwCreateWindow(512, 512, "hello", nullptr, nullptr);
   if (!window) {
     return -1;
