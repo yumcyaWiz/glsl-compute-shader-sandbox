@@ -9,7 +9,6 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 //
-#include "gcss/framebuffer.h"
 #include "renderer.h"
 
 Renderer* RENDERER;
@@ -75,7 +74,6 @@ int main() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);  // required for Mac
 
 #ifdef NDEBUG
   glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_FALSE);
@@ -83,8 +81,7 @@ int main() {
   glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 #endif
 
-  GLFWwindow* window =
-      glfwCreateWindow(512, 512, "life-game", nullptr, nullptr);
+  GLFWwindow* window = glfwCreateWindow(512, 512, "n-body", nullptr, nullptr);
   if (!window) {
     return -1;
   }
