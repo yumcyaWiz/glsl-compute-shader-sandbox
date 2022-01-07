@@ -44,6 +44,9 @@ class Renderer {
 
     updateParticlesPipeline.attachComputeShader(updateParticles);
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE);
+
     renderPipeline.attachVertexShader(vertexShader);
     renderPipeline.attachFragmentShader(fragmentShader);
 
