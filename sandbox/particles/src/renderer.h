@@ -22,6 +22,7 @@ class Renderer {
   float k;
   float dt;
   bool increaseK;
+  bool pause;
   glm::vec3 baseColor;
 
   Camera camera;
@@ -46,6 +47,8 @@ class Renderer {
         gravityIntensity{0.1f},
         k{0.1f},
         dt{0.01f},
+        increaseK{false},
+        pause{false},
         baseColor{0.2, 0.4, 0.8},
         updateParticles{std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
                         "shaders" / "update-particles.comp"},
@@ -96,6 +99,8 @@ class Renderer {
   void setDt(float dt) { this->dt = dt; }
 
   void setIncreaseK(bool increaseK) { this->increaseK = increaseK; }
+
+  void setPause(bool pause) { this->pause = pause; }
 
   glm::vec3 getBaseColor() const { return baseColor; }
   void setBaseColor(const glm::vec3& baseColor) { this->baseColor = baseColor; }
@@ -157,6 +162,7 @@ class Renderer {
       updateParticles.setUniform("increaseK", increaseK);
       updateParticles.setUniform("k", k);
       updateParticles.setUniform("dt", dt);
+      updateParticles.setUniform("pause", pause);
       updateParticlesPipeline.activate();
       glDispatchCompute(std::ceil(nParticles / 128.0f), 1, 1);
       updateParticlesPipeline.deactivate();

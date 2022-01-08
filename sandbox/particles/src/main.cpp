@@ -81,6 +81,13 @@ void handleInput(GLFWwindow* window, const ImGuiIO& io) {
   } else {
     RENDERER->setIncreaseK(false);
   }
+
+  // pause
+  if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+    RENDERER->setPause(true);
+  } else {
+    RENDERER->setPause(false);
+  }
 }
 
 int main() {
