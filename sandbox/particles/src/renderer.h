@@ -153,7 +153,7 @@ class Renderer {
 
     // update particles
     elapsed_time += delta_time;
-    if (elapsed_time > dt) {
+    if (elapsed_time > dt && !pause) {
       elapsed_time = 0;
 
       particlesBuffer.bindToShaderStorageBuffer(0);
@@ -162,7 +162,6 @@ class Renderer {
       updateParticles.setUniform("increaseK", increaseK);
       updateParticles.setUniform("k", k);
       updateParticles.setUniform("dt", dt);
-      updateParticles.setUniform("pause", pause);
       updateParticlesPipeline.activate();
       glDispatchCompute(std::ceil(nParticles / 128.0f), 1, 1);
       updateParticlesPipeline.deactivate();
