@@ -4,9 +4,10 @@
 
 #include "glad/gl.h"
 #include "glm/glm.hpp"
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 namespace gcss {
-
 class Texture {
  private:
   glm::uvec2 resolution;
@@ -87,11 +88,37 @@ class Texture {
   }
 
   template <typename T>
-  void setImage(const std::vector<T>& image) const {
+  void setImage(const std::vector<T>& image, const glm::uvec2& resolution) {
+    this->resolution = resolution;
+
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, resolution.x, resolution.y,
                  0, format, type, image.data());
     glBindTexture(GL_TEXTURE_2D, 0);
+  }
+
+  template <typename T>
+  void setImage(const T* image, const glm::uvec2& resolution) {
+    this->resolution = resolution;
+
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, resolution.x, resolution.y,
+                 0, format, type, image);
+    glBindTexture(GL_TEXTURE_2D, 0);
+  }
+
+  void loadHDR(const std::filesystem::path& filepath) {
+    const std::string filepath_str = filepath.generic_string();
+    int width, height, channels;
+    float* image =
+        stbi_loadf(filepath_str.c_str(), &width, &height, &channels, 4);
+
+    this->internalFormat = GL_RGBA32F;
+    this->format = GL_RGBA;
+    this->type = GL_FLOAT;
+    setImage(image, glm::uvec2(width, height));
+
+    stbi_image_free(image);
   }
 
   // bind texture to the specified texture unit
