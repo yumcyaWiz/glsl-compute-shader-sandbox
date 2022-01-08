@@ -21,6 +21,7 @@ target_link_libraries(gcss INTERFACE glfw)
 target_link_libraries(gcss INTERFACE imgui)
 target_link_libraries(gcss INTERFACE imgui_glfw_opengl3)
 target_link_libraries(gcss INTERFACE glm)
+target_link_libraries(gcss INTERFACE stb)
 target_link_libraries(gcss INTERFACE spdlog::spdlog)
 
 # compile options
