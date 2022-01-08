@@ -17,8 +17,8 @@ class Texture {
   GLenum type;
 
  public:
-  Texture(const glm::uvec2& resolution, GLint internal_format, GLenum format,
-          GLenum type)
+  Texture(const glm::uvec2& resolution, GLint internal_format = GL_RGBA32F,
+          GLenum format = GL_RGBA, GLenum type = GL_FLOAT)
       : resolution(resolution),
         internalFormat(internal_format),
         format(format),
