@@ -40,9 +40,7 @@ class Renderer {
 
   void setResolution(const glm::uvec2& resolution) {
     this->resolution = resolution;
-
-    // resize texture
-    texture.setResolution(this->resolution);
+    texture.resize(resolution);
   }
 
   void render() const {

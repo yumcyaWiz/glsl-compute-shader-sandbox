@@ -60,12 +60,12 @@ class Renderer {
     std::random_device rnd_dev;
     std::mt19937 mt(rnd_dev());
     std::uniform_real_distribution<float> dist(0, 1);
-    std::vector<uint8_t> input_cell_image(this->resolution.x *
-                                          this->resolution.y);
+    std::vector<uint8_t> input_cell_image(resolution.x * resolution.y);
     for (std::size_t i = 0; i < input_cell_image.size(); ++i) {
       input_cell_image[i] = dist(mt) > 0.5 ? 1 : 0;
     }
-    cellsIn.setImage(input_cell_image);
+    cellsIn.setImage(input_cell_image, resolution, GL_R8UI, GL_RED_INTEGER,
+                     GL_UNSIGNED_BYTE);
   }
 
   glm::uvec2 getResolution() const { return this->resolution; }
@@ -78,8 +78,8 @@ class Renderer {
     this->resolution = resolution;
     this->offset = 0.5f * glm::vec2(resolution);
 
-    cellsIn.setResolution(this->resolution);
-    cellsOut.setResolution(this->resolution);
+    cellsIn.resize(resolution);
+    cellsOut.resize(resolution);
 
     randomizeCells();
   }

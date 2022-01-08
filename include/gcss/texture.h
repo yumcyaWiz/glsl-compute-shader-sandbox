@@ -17,25 +17,21 @@ class Texture {
   GLenum type;
 
  public:
-  Texture(const glm::uvec2& resolution, GLint internal_format = GL_RGBA32F,
-          GLenum format = GL_RGBA, GLenum type = GL_FLOAT)
-      : resolution(resolution),
-        internalFormat(internal_format),
-        format(format),
-        type(type) {
+  Texture() {
     // init texture
     glCreateTextures(GL_TEXTURE_2D, 1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, resolution.x, resolution.y,
-                 0, format, type, nullptr);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
     glTextureParameteri(texture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTextureParameteri(texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTextureParameteri(texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTextureParameteri(texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
     spdlog::info("[Texture] texture {:x} created", this->texture);
+  }
+
+  Texture(const glm::uvec2& resolution, GLint internalFormat, GLenum format,
+          GLenum type)
+      : Texture() {
+    initImage(resolution, internalFormat, format, type);
   }
 
   Texture(const Texture& other) = delete;
@@ -79,8 +75,13 @@ class Texture {
 
   GLenum getType() const { return this->type; }
 
-  void setResolution(const glm::uvec2& resolution) {
+  void initImage(const glm::uvec2& resolution, GLint internalFormat,
+                 GLenum format, GLenum type) {
     this->resolution = resolution;
+    this->internalFormat = internalFormat;
+    this->format = format;
+    this->type = type;
+
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, resolution.x, resolution.y,
                  0, format, type, nullptr);
@@ -88,8 +89,12 @@ class Texture {
   }
 
   template <typename T>
-  void setImage(const std::vector<T>& image, const glm::uvec2& resolution) {
+  void setImage(const std::vector<T>& image, const glm::uvec2& resolution,
+                GLint internalFormat, GLenum format, GLenum type) {
     this->resolution = resolution;
+    this->internalFormat = internalFormat;
+    this->format = format;
+    this->type = type;
 
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, resolution.x, resolution.y,
@@ -98,13 +103,21 @@ class Texture {
   }
 
   template <typename T>
-  void setImage(const T* image, const glm::uvec2& resolution) {
+  void setImage(const T* image, const glm::uvec2& resolution,
+                GLint internalFormat, GLenum format, GLenum type) {
     this->resolution = resolution;
+    this->internalFormat = internalFormat;
+    this->format = format;
+    this->type = type;
 
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, resolution.x, resolution.y,
                  0, format, type, image);
     glBindTexture(GL_TEXTURE_2D, 0);
+  }
+
+  void resize(const glm::uvec2& resolution) {
+    initImage(resolution, internalFormat, format, type);
   }
 
   void loadHDR(const std::filesystem::path& filepath) {
@@ -116,7 +129,7 @@ class Texture {
     this->internalFormat = GL_RGBA32F;
     this->format = GL_RGBA;
     this->type = GL_FLOAT;
-    setImage(image, glm::uvec2(width, height));
+    setImage(image, glm::uvec2(width, height), GL_RGBA32F, GL_RGBA, GL_FLOAT);
 
     stbi_image_free(image);
   }
