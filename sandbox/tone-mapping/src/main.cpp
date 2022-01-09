@@ -78,6 +78,11 @@ int main() {
       if (ImGui::SliderFloat("Exposure", &exposure, 0, 10)) {
         RENDERER->setExposure(exposure);
       }
+
+      static bool tone_mapping_on_rgb = RENDERER->getToneMappingOnRGB();
+      if (ImGui::Checkbox("Tone mapping on RGB", &tone_mapping_on_rgb)) {
+        RENDERER->setToneMappingOnRGB(tone_mapping_on_rgb);
+      }
     }
     ImGui::End();
 

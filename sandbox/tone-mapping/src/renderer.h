@@ -13,6 +13,7 @@ class Renderer {
  private:
   glm::uvec2 resolution;
   float exposure;
+  bool toneMappingOnRGB;
 
   Texture textureIn;
   Texture textureOut;
@@ -53,11 +54,17 @@ class Renderer {
   float getExposure() const { return exposure; }
   void setExposure(float exposure) { this->exposure = exposure; }
 
+  bool getToneMappingOnRGB() const { return toneMappingOnRGB; }
+  void setToneMappingOnRGB(bool toneMappingOnRGB) {
+    this->toneMappingOnRGB = toneMappingOnRGB;
+  }
+
   void render() const {
     // run compute shader
     textureIn.bindToImageUnit(0, GL_READ_ONLY);
     textureOut.bindToImageUnit(1, GL_WRITE_ONLY);
     toneMapping.setUniform("exposure", exposure);
+    toneMapping.setUniform("toneMappingOnRGB", toneMappingOnRGB);
     toneMappingPipeline.activate();
     const glm::uvec2 image_resolution = textureIn.getResolution();
     glDispatchCompute(std::ceil(image_resolution.x / 8.0f),

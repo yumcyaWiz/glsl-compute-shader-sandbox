@@ -6,6 +6,7 @@ layout(rgba32f, binding = 1) uniform image2D textureOut;
 
 uniform float exposure;
 uniform float white;
+uniform bool toneMappingOnRGB;
 
 vec3 rgb2xyz(vec3 rgb) {
   return vec3(
@@ -88,14 +89,24 @@ float uchimura(float x) {
     return t_uchimura(x, P, a, m, l, c, b);
 }
 
+float toneMapping(float x) {
+  return ACES(x);
+}
+
 void main() {
   ivec2 gidx = ivec2(gl_GlobalInvocationID.xy);
-
   vec3 rgb = imageLoad(textureIn, gidx).xyz;
-  vec3 Yxy = rgb2Yxy(rgb);
 
-  Yxy.x = uchimura(exposure * Yxy.x);
-  rgb = Yxy2rgb(Yxy);
+  if(toneMappingOnRGB) {
+    rgb.x = toneMapping(exposure * rgb.x);
+    rgb.y = toneMapping(exposure * rgb.y);
+    rgb.z = toneMapping(exposure * rgb.z);
+  }
+  else {
+    vec3 Yxy = rgb2Yxy(rgb);
+    Yxy.x = uchimura(exposure * Yxy.x);
+    rgb = Yxy2rgb(Yxy);
+  }
 
   // gamma correction
   rgb = pow(rgb, vec3(1.0 / 2.2));
