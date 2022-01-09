@@ -123,8 +123,12 @@ class Texture {
   void loadHDR(const std::filesystem::path& filepath) {
     const std::string filepath_str = filepath.generic_string();
     int width, height, channels;
+    stbi_set_flip_vertically_on_load(true);
     float* image =
         stbi_loadf(filepath_str.c_str(), &width, &height, &channels, 4);
+    if (!image) {
+      spdlog::error("[Texture] failed to load {}", filepath_str);
+    }
 
     this->internalFormat = GL_RGBA32F;
     this->format = GL_RGBA;
