@@ -83,6 +83,14 @@ int main() {
       if (ImGui::Checkbox("Tone mapping on RGB", &tone_mapping_on_rgb)) {
         RENDERER->setToneMappingOnRGB(tone_mapping_on_rgb);
       }
+
+      static int tone_mapping_type =
+          static_cast<int>(RENDERER->getToneMappingType());
+      if (ImGui::Combo("Tone mapping function", &tone_mapping_type,
+                       "Linear\0Reinhard\0ACES\0Uchimura\0\0")) {
+        RENDERER->setToneMappingType(
+            static_cast<ToneMappingType>(tone_mapping_type));
+      }
     }
     ImGui::End();
 

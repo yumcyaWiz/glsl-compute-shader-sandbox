@@ -7,6 +7,7 @@ layout(rgba32f, binding = 1) uniform image2D textureOut;
 uniform float exposure;
 uniform float white;
 uniform bool toneMappingOnRGB;
+uniform int toneMappingType;
 
 vec3 rgb2xyz(vec3 rgb) {
   return vec3(
@@ -90,7 +91,18 @@ float uchimura(float x) {
 }
 
 float toneMapping(float x) {
-  return ACES(x);
+  if(toneMappingType == 0) {
+    return linear(x);
+  }
+  else if(toneMappingType == 1) {
+    return reinhard(x);
+  }
+  else if(toneMappingType == 2) {
+    return ACES(x);
+  }
+  else if(toneMappingType == 3) {
+    return uchimura(x);
+  }
 }
 
 void main() {
@@ -104,7 +116,7 @@ void main() {
   }
   else {
     vec3 Yxy = rgb2Yxy(rgb);
-    Yxy.x = uchimura(exposure * Yxy.x);
+    Yxy.x = toneMapping(exposure * Yxy.x);
     rgb = Yxy2rgb(Yxy);
   }
 
