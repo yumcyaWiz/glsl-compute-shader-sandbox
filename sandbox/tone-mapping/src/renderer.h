@@ -12,6 +12,7 @@ using namespace gcss;
 class Renderer {
  private:
   glm::uvec2 resolution;
+  float exposure;
 
   Texture textureIn;
   Texture textureOut;
@@ -26,6 +27,7 @@ class Renderer {
  public:
   Renderer()
       : resolution{512, 512},
+        exposure{1.0f},
         textureIn{resolution, GL_RGBA32F, GL_RGBA, GL_FLOAT},
         toneMapping(std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
                     "shaders" / "tone-mapping.comp"),
@@ -48,10 +50,14 @@ class Renderer {
     this->resolution = resolution;
   }
 
+  float getExposure() const { return exposure; }
+  void setExposure(float exposure) { this->exposure = exposure; }
+
   void render() const {
     // run compute shader
     textureIn.bindToImageUnit(0, GL_READ_ONLY);
     textureOut.bindToImageUnit(1, GL_WRITE_ONLY);
+    toneMapping.setUniform("exposure", exposure);
     toneMappingPipeline.activate();
     const glm::uvec2 image_resolution = textureIn.getResolution();
     glDispatchCompute(std::ceil(image_resolution.x / 8.0f),

@@ -73,6 +73,12 @@ int main() {
     ImGui::NewFrame();
 
     ImGui::Begin("UI");
+    {
+      static float exposure = RENDERER->getExposure();
+      if (ImGui::SliderFloat("Exposure", &exposure, 0, 10)) {
+        RENDERER->setExposure(exposure);
+      }
+    }
     ImGui::End();
 
     // render

@@ -43,7 +43,7 @@ void main() {
   vec3 rgb = imageLoad(textureIn, gidx).xyz;
   vec3 Yxy = rgb2Yxy(rgb);
 
-  Yxy.x = reinhard(1.0 * Yxy.x);
+  Yxy.x = reinhard(exposure * Yxy.x);
   rgb = Yxy2rgb(Yxy);
 
   // gamma correction
