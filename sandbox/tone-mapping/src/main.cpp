@@ -91,6 +91,11 @@ int main() {
         RENDERER->setToneMappingType(
             static_cast<ToneMappingType>(tone_mapping_type));
       }
+
+      static float gamma = RENDERER->getGamma();
+      if (ImGui::SliderFloat("Gamma", &gamma, 0, 3)) {
+        RENDERER->setGamma(gamma);
+      }
     }
     ImGui::End();
 

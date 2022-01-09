@@ -9,7 +9,12 @@
 
 using namespace gcss;
 
-enum class ToneMappingType : int { LINEAR = 0, REINHARD = 1, ACES = 2, UCHIMURA = 3 };
+enum class ToneMappingType : int {
+  LINEAR = 0,
+  REINHARD = 1,
+  ACES = 2,
+  UCHIMURA = 3
+};
 
 class Renderer {
  private:
@@ -17,6 +22,7 @@ class Renderer {
   float exposure;
   bool toneMappingOnRGB;
   ToneMappingType toneMappingType;
+  float gamma;
 
   Texture textureIn;
   Texture textureOut;
@@ -34,6 +40,7 @@ class Renderer {
         exposure{1.0f},
         toneMappingOnRGB{false},
         toneMappingType{ToneMappingType::REINHARD},
+        gamma{2.2f},
         textureIn{resolution, GL_RGBA32F, GL_RGBA, GL_FLOAT},
         toneMapping(std::filesystem::path(CMAKE_CURRENT_SOURCE_DIR) /
                     "shaders" / "tone-mapping.comp"),
@@ -69,6 +76,9 @@ class Renderer {
     this->toneMappingType = type;
   }
 
+  float getGamma() const { return gamma; }
+  void setGamma(float gamma) { this->gamma = gamma; }
+
   void render() const {
     // run compute shader
     textureIn.bindToImageUnit(0, GL_READ_ONLY);
@@ -77,6 +87,7 @@ class Renderer {
     toneMapping.setUniform("toneMappingOnRGB", toneMappingOnRGB);
     toneMapping.setUniform("toneMappingType",
                            static_cast<int>(toneMappingType));
+    toneMapping.setUniform("gamma", gamma);
     toneMappingPipeline.activate();
     const glm::uvec2 image_resolution = textureIn.getResolution();
     glDispatchCompute(std::ceil(image_resolution.x / 8.0f),
