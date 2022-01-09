@@ -4,11 +4,50 @@ layout(local_size_x = 8, local_size_y = 8) in;
 layout(rgba32f, binding = 0) uniform image2D textureIn;
 layout(rgba32f, binding = 1) uniform image2D textureOut;
 
+uniform float exposure;
+uniform float white;
+
+vec3 rgb2xyz(vec3 rgb) {
+  return vec3(
+    dot(vec3(0.4124564, 0.3575761, 0.1804375), rgb),
+    dot(vec3(0.2126729, 0.7151522, 0.0721750), rgb),
+    dot(vec3(0.0193339, 0.1191920, 0.9503041), rgb)
+  );
+}
+
+vec3 xyz2rgb(vec3 xyz) {
+  return vec3(
+    dot(vec3(3.2404542, -1.5371385, -0.4985314), xyz),
+    dot(vec3(-0.9692660, 1.8760108, 0.0415560), xyz),
+    dot(vec3(0.0556434, -0.2040259, 1.0572252), xyz)
+  );
+}
+
+vec3 rgb2Yxy(vec3 rgb) {
+  vec3 xyz = rgb2xyz(rgb);
+  return vec3(xyz.y, xyz.x / xyz.y, xyz.z / xyz.y);
+}
+
+vec3 Yxy2rgb(vec3 Yxy) {
+  vec3 xyz = vec3(Yxy.x * Yxy.y, Yxy.x, Yxy.x * Yxy.z);
+  return xyz2rgb(xyz);
+}
+
+float reinhard(float x) {
+  return x / (1.0 + x);
+}
+
 void main() {
   ivec2 gidx = ivec2(gl_GlobalInvocationID.xy);
 
-  vec3 color = imageLoad(textureIn, gidx).xyz;
-  color = color / (1.0 + color);
+  vec3 rgb = imageLoad(textureIn, gidx).xyz;
+  vec3 Yxy = rgb2Yxy(rgb);
 
-  imageStore(textureOut, gidx, vec4(color, 1.0));
+  Yxy.x = reinhard(1.0 * Yxy.x);
+  rgb = Yxy2rgb(Yxy);
+
+  // gamma correction
+  rgb = pow(rgb, vec3(1.0 / 2.2));
+
+  imageStore(textureOut, gidx, vec4(rgb, 1.0));
 }
